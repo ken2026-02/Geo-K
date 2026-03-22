@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "transformation_batch_id": "transform-batch-geo-001",
+  "source_learning_pack_id": "learning-pack-v1-sample-geo-001",
+  "source_learning_export_id": "learning-export-2026-03-19",
+  "transformation_method": "hybrid",
+  "candidates": [
+    {
+      "candidate_id": "candidate-geo-feature-open-joint",
+      "proposed_target_type": "geo_feature",
+      "proposed_fields": {
+        "name": "open joint",
+        "category": "discontinuity feature",
+        "mechanism": "loss of confinement along an existing discontinuity",
+        "description": "Joint with visible opening that may indicate instability or seepage pathways.",
+        "typical_conditions": [
+          "jointed rock mass",
+          "excavation exposure"
+        ],
+        "field_indicators": [
+          "visible aperture",
+          "fresh opening along joint trace"
+        ],
+        "engineering_assessment": [
+          "assess aperture persistence",
+          "assess block release implications"
+        ],
+        "reporting_expressions": [
+          "Open joint observed in sidewall."
+        ]
+      },
+      "supporting_learning_item_ids": [
+        "learn-phrase-open-joint",
+        "learn-concept-detached-block-risk"
+      ],
+      "confidence": "medium",
+      "ambiguity_flags": [
+        "category_requires_manual_confirmation"
+      ],
+      "reviewer_decision": "pending",
+      "reviewer_notes": "Mechanism is plausible but should be checked against source wording."
+    },
+    {
+      "candidate_id": "candidate-strategy-reinspection",
+      "proposed_target_type": "strategy",
+      "proposed_fields": {
+        "name": "re-inspection",
+        "category": "monitoring action",
+        "trigger_conditions": [
+          "crack width change suspected",
+          "repeat observations required"
+        ],
+        "actions": [
+          "schedule follow-up inspection",
+          "compare against prior notes"
+        ],
+        "reporting_expressions": [
+          "Re-inspection recommended to confirm change progression."
+        ]
+      },
+      "supporting_learning_item_ids": [
+        "learn-concept-detached-block-risk"
+      ],
+      "confidence": "high",
+      "reviewer_decision": "accepted"
+    }
+  ]
+}

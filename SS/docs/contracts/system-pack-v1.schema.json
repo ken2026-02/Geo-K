@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "system-pack-v1.schema.json",
+  "title": "System Pack v1",
+  "type": "object",
+  "required": ["schema_version", "pack_id", "geo_materials", "geo_features", "strategies"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "pack_id": { "type": "string", "minLength": 1 },
+    "geo_materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "category", "description", "key_properties", "engineering_behaviour", "reporting_expressions"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "category": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "key_properties": { "type": "array", "items": { "type": "string" } },
+          "engineering_behaviour": { "type": "array", "items": { "type": "string" } },
+          "reporting_expressions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "geo_features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "category", "mechanism", "description", "typical_conditions", "field_indicators", "engineering_assessment", "reporting_expressions"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "category": { "type": "string", "minLength": 1 },
+          "mechanism": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "typical_conditions": { "type": "array", "items": { "type": "string" } },
+          "field_indicators": { "type": "array", "items": { "type": "string" } },
+          "engineering_assessment": { "type": "array", "items": { "type": "string" } },
+          "reporting_expressions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "strategies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "category", "trigger_conditions", "actions", "reporting_expressions"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "category": { "type": "string", "minLength": 1 },
+          "trigger_conditions": { "type": "array", "items": { "type": "string" } },
+          "actions": { "type": "array", "items": { "type": "string" } },
+          "reporting_expressions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

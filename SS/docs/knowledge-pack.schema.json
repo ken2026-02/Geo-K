@@ -1,0 +1,77 @@
+﻿{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engineering-knowledge-vault.local/schema/knowledge-pack-1.0.json",
+  "title": "Engineering Knowledge Vault Knowledge Pack v1.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "pack_id",
+    "generated_at",
+    "generator",
+    "source_report",
+    "statistics",
+    "items",
+    "images"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "pack_id": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "generator": {
+      "type": "object",
+      "required": ["model", "version"],
+      "properties": {
+        "model": { "type": "string" },
+        "version": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "source_report": {
+      "type": "object",
+      "required": ["report_id", "title", "project", "discipline", "author", "organization", "date", "file_name"],
+      "properties": {
+        "report_id": { "type": "string" },
+        "title": { "type": "string" },
+        "project": { "type": "string" },
+        "discipline": { "type": "string" },
+        "author": { "type": "string" },
+        "organization": { "type": "string" },
+        "date": { "type": "string" },
+        "file_name": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "statistics": {
+      "type": "object",
+      "required": ["words", "phrases", "sentences", "geo_materials", "geo_features", "strategies", "images"],
+      "properties": {
+        "words": { "type": "integer", "minimum": 0 },
+        "phrases": { "type": "integer", "minimum": 0 },
+        "sentences": { "type": "integer", "minimum": 0 },
+        "geo_materials": { "type": "integer", "minimum": 0 },
+        "geo_features": { "type": "integer", "minimum": 0 },
+        "strategies": { "type": "integer", "minimum": 0 },
+        "images": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "items": {
+      "type": "object",
+      "required": ["words", "phrases", "sentences", "geo_materials", "geo_features", "strategies"],
+      "properties": {
+        "words": { "type": "array" },
+        "phrases": { "type": "array" },
+        "sentences": { "type": "array" },
+        "geo_materials": { "type": "array" },
+        "geo_features": { "type": "array" },
+        "strategies": { "type": "array" }
+      },
+      "additionalProperties": true
+    },
+    "images": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}
