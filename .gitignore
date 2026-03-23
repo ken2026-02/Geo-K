@@ -1,11 +1,6 @@
 node_modules/
 dist/
 dev-dist/
+db/
+artifacts/
 .vercel/
-.env
-.env.*
-!.env.example
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
