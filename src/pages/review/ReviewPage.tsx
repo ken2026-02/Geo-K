@@ -253,15 +253,6 @@ export function ReviewPage() {
               </InlineInfo>
             </div>
           </div>
-          <div style={{ minWidth: "220px", display: "grid", gap: "0.5rem" }}>
-            <div style={{ color: "#64748b", fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-              Current mode
-            </div>
-            <div style={{ fontWeight: 700, color: "#0f172a" }}>{selectedMode.label}</div>
-            <div style={{ color: "#64748b", fontSize: "0.92rem" }}>
-              {favoritesOnly ? "Favorites filter enabled" : "All approved items included"}
-            </div>
-          </div>
         </div>
         <div style={{ display: "grid", gap: "0.75rem", marginTop: "1rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "0.75rem", alignItems: "end" }}>
@@ -294,55 +285,6 @@ export function ReviewPage() {
         </section>
       ) : null}
 
-      <section style={pageSectionStyle}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginBottom: "0.8rem" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-              <h3 style={{ margin: 0 }}>Session Snapshot</h3>
-              <InlineInfo title="Review stats">
-                Keep the first row focused on queue health. Expand for deeper stats only when you need them.
-              </InlineInfo>
-            </div>
-          </div>
-          <button type="button" onClick={() => setShowAllStats((value) => !value)} style={subtleButtonStyle}>
-            {showAllStats ? "Show less" : "Show more"}
-          </button>
-        </div>
-        <div style={statGridStyle}>
-          {summaryCards.map((card) => (
-            <div
-              key={card.label}
-              style={{
-                ...statCardStyle,
-                background: card.tone === "success" ? "#f0fdf4" : statCardStyle.background,
-                border: card.tone === "success" ? "1px solid #bbf7d0" : statCardStyle.border
-              }}
-            >
-              <span style={{ display: "block", fontSize: "0.78rem", color: card.tone === "success" ? "#166534" : "#6b7280", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>
-                {card.label}
-              </span>
-              <span style={{ fontSize: "1.3rem", fontWeight: 800, color: card.tone === "success" ? "#166534" : "#0f172a" }}>{card.value}</span>
-            </div>
-          ))}
-          {showAllStats ? (
-            <>
-              {[
-                ["Correct", stats.correct],
-                ["Incorrect", stats.incorrect],
-                ["Needs Review", stats.needsReview]
-              ].map(([label, value]) => (
-                <div key={label} style={statCardStyle}>
-                  <span style={{ display: "block", fontSize: "0.78rem", color: "#6b7280", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>
-                    {label}
-                  </span>
-                  <span style={{ fontSize: "1.3rem", fontWeight: 800, color: "#0f172a" }}>{value}</span>
-                </div>
-              ))}
-            </>
-          ) : null}
-        </div>
-      </section>
-
       {currentCard ? (
         <section style={pageSectionStyle}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", gap: "0.75rem", flexWrap: "wrap" }}>
@@ -355,13 +297,6 @@ export function ReviewPage() {
           </div>
 
           <h2 style={{ margin: "0 0 0.5rem", fontSize: "1.5rem", fontWeight: 800, color: "#111827" }}>{currentCard.title}</h2>
-
-          <div style={{ padding: "1rem", background: "#f8fafc", borderRadius: "0.85rem", border: "1px solid #e2e8f0", marginBottom: "1rem" }}>
-            <p style={{ margin: 0, fontWeight: 700, color: "#475569", fontSize: "0.82rem", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-              Prompt
-            </p>
-            <p style={{ margin: "0.3rem 0 0", fontSize: "1.08rem", color: "#0f172a" }}>{currentCard.prompt}</p>
-          </div>
 
           {showAnswer ? (
             <div style={{ marginTop: "1rem", padding: "1rem", border: "1px solid #bbf7d0", borderRadius: "0.85rem", background: "#f0fdf4" }}>
@@ -380,7 +315,7 @@ export function ReviewPage() {
             </div>
           ) : null}
 
-          <div style={{ ...actionRowStyle, marginTop: "1.25rem" }}>
+          <div style={{ ...actionRowStyle, marginTop: "1rem" }}>
             <button
               onClick={() => setShowAnswer((value) => !value)}
               disabled={isProcessing}
@@ -448,38 +383,93 @@ export function ReviewPage() {
             </section>
           ) : null}
 
-          <div style={{ ...statGridStyle, marginTop: "1.25rem" }}>
+          <div style={{ ...statGridStyle, marginTop: "1rem", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "0.55rem" }}>
             <button
               onClick={() => void handleResult("correct")}
               disabled={isProcessing}
-              style={{ ...primaryButtonStyle, background: "#16a34a", border: "1px solid #16a34a" }}
+              style={{ ...primaryButtonStyle, minHeight: "44px", padding: "0.65rem 0.35rem", background: "#16a34a", border: "1px solid #16a34a" }}
             >
               Correct
             </button>
             <button
               onClick={() => void handleResult("incorrect")}
               disabled={isProcessing}
-              style={{ ...primaryButtonStyle, background: "#dc2626", border: "1px solid #dc2626" }}
+              style={{ ...primaryButtonStyle, minHeight: "44px", padding: "0.65rem 0.35rem", background: "#dc2626", border: "1px solid #dc2626" }}
             >
               Incorrect
             </button>
             <button
               onClick={() => void handleResult("skipped")}
               disabled={isProcessing}
-              style={secondaryButtonStyle}
+              style={{ ...secondaryButtonStyle, minHeight: "44px", padding: "0.65rem 0.35rem" }}
             >
-              Skipped
+              Skip
             </button>
             <button
               onClick={() => void handleResult("needs_review")}
               disabled={isProcessing}
-              style={{ ...secondaryButtonStyle, background: "#fffbeb", border: "1px solid #fde68a", color: "#92400e" }}
+              style={{ ...secondaryButtonStyle, minHeight: "44px", padding: "0.65rem 0.35rem", background: "#fffbeb", border: "1px solid #fde68a", color: "#92400e" }}
             >
-              Needs Review
+              Review
             </button>
           </div>
         </section>
       ) : null}
+
+      <section style={{ ...pageSectionStyle, padding: "0.85rem", marginTop: currentCard ? "0.5rem" : 0 }}>
+        <details>
+          <summary style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", cursor: "pointer", listStyle: "none" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <h3 style={{ margin: 0, fontSize: "1rem" }}>Session Snapshot</h3>
+              <InlineInfo title="Review stats">
+                Keep this as a lightweight reference only. Expand when you need progress details.
+              </InlineInfo>
+            </div>
+            <span style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: 600 }}>
+              {summaryCards[0].value} queue · {summaryCards[1].value} today
+            </span>
+          </summary>
+          <div style={{ ...statGridStyle, gridTemplateColumns: showAllStats ? "repeat(auto-fit, minmax(110px, 1fr))" : "repeat(3, minmax(0, 1fr))", gap: "0.55rem", marginTop: "0.85rem" }}>
+            {summaryCards.map((card) => (
+              <div
+                key={card.label}
+                style={{
+                  ...statCardStyle,
+                  padding: "0.65rem",
+                  background: card.tone === "success" ? "#f0fdf4" : statCardStyle.background,
+                  border: card.tone === "success" ? "1px solid #bbf7d0" : statCardStyle.border
+                }}
+              >
+                <span style={{ display: "block", fontSize: "0.72rem", color: card.tone === "success" ? "#166534" : "#6b7280", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>
+                  {card.label}
+                </span>
+                <span style={{ fontSize: "1.15rem", fontWeight: 800, color: card.tone === "success" ? "#166534" : "#0f172a" }}>{card.value}</span>
+              </div>
+            ))}
+            {showAllStats ? (
+              <>
+                {[
+                  ["Correct", stats.correct],
+                  ["Incorrect", stats.incorrect],
+                  ["Needs Review", stats.needsReview]
+                ].map(([label, value]) => (
+                  <div key={label} style={{ ...statCardStyle, padding: "0.65rem" }}>
+                    <span style={{ display: "block", fontSize: "0.72rem", color: "#6b7280", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>
+                      {label}
+                    </span>
+                    <span style={{ fontSize: "1.15rem", fontWeight: 800, color: "#0f172a" }}>{value}</span>
+                  </div>
+                ))}
+              </>
+            ) : null}
+          </div>
+          <div style={{ marginTop: "0.75rem", display: "flex", justifyContent: "flex-end" }}>
+            <button type="button" onClick={() => setShowAllStats((value) => !value)} style={subtleButtonStyle}>
+              {showAllStats ? "Show less" : "Show more"}
+            </button>
+          </div>
+        </details>
+      </section>
     </AppShell>
   );
 }

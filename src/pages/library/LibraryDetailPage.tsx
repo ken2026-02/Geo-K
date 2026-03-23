@@ -314,8 +314,8 @@ export function LibraryDetailPage() {
     }
   }
 
-  if (!validSection) return <AppShell title="Library Detail" subtitle="Invalid section."><p>Unknown library section.</p><Link to="/library">Back to Library</Link></AppShell>;
-  if (!detailView) return <AppShell title="Library Detail" subtitle="Item not found."><p>Could not find this approved item.</p><Link to={`/library/${validSection}`}>Back to {sectionLabels[validSection]}</Link></AppShell>;
+  if (!validSection) return <AppShell title="Library Detail" subtitle="Invalid section."><p>Unknown library section.</p><p><Link to="/library" className="ekv-button-compact">Back to Library</Link></p></AppShell>;
+  if (!detailView) return <AppShell title="Library Detail" subtitle="Item not found."><p>Could not find this approved item.</p><p><Link to={`/library/${validSection}`} className="ekv-button-compact">Back to {sectionLabels[validSection]}</Link></p></AppShell>;
 
   const sortedPersonalNotes = [...personalNotes].sort(comparePersonalNotes);
   const activePersonalNotes = sortedPersonalNotes.filter((note) => note.status === "active");
@@ -531,8 +531,8 @@ export function LibraryDetailPage() {
         }}
         onCancel={() => setShowDeleteConfirm(false)}
       />
-      <p><Link to={`/library/${validSection}`}>Back to {sectionLabels[validSection]}</Link></p>
-      {editError ? <div style={{ marginBottom: "1rem" }}><FeedbackBanner tone="error" message={editError} /></div> : null}
+      <div className="mb-4"><Link to={`/library/${validSection}`} className="ekv-button-compact min-h-11 px-4">Back to {sectionLabels[validSection]}</Link></div>
+      {editError ? <div className="mb-4"><FeedbackBanner tone="error" message={editError} /></div> : null}
 
       {isGeoSection ? (
         <section style={{ border: "1px solid #e5e7eb", borderRadius: "0.8rem", padding: "0.8rem", background: "#fff", marginBottom: "1rem" }}>
@@ -545,31 +545,31 @@ export function LibraryDetailPage() {
           </p>
         </section>
       ) : (
-        <section style={{ border: "1px solid #dbe5f3", borderRadius: "1rem", padding: "1rem", background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)", marginBottom: "1rem" }}>
-          <div style={{ display: "grid", gap: "0.75rem" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem", alignItems: "center" }}>
+        <section className="mb-4 rounded-[1.6rem] border border-sky-100 bg-gradient-to-b from-white to-sky-50 p-4">
+          <div className="grid gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               {nonGeoChips.map((chip) => (
-                <span key={chip} style={{ padding: "0.18rem 0.55rem", borderRadius: "999px", background: "#eef4ff", color: "#1e3a8a", fontSize: "0.82rem", fontWeight: 600 }}>
+                <span key={chip} className="ekv-chip bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200">
                   {chip}
                 </span>
               ))}
-              <span style={{ padding: "0.18rem 0.55rem", borderRadius: "999px", background: "#f8fafc", color: "#475569", fontSize: "0.82rem", fontWeight: 600 }}>
+              <span className="ekv-chip bg-slate-100 text-slate-600 ring-1 ring-slate-200">
                 {detailView.record.sources.length > 0 ? `${detailView.record.sources.length} source${detailView.record.sources.length === 1 ? "" : "s"}` : "No source"}
               </span>
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: "1.6rem", lineHeight: 1.1 }}>{detailView.title}</h3>
+              <h3 className="m-0 text-[1.45rem] font-semibold leading-tight text-slate-950">{detailView.title}</h3>
               {nonGeoPrimarySummary ? (
-                <p style={{ margin: "0.45rem 0 0", color: "#0f172a", fontSize: "1.02rem", lineHeight: 1.5 }}>{nonGeoPrimarySummary}</p>
+                <p className="mt-2 text-base leading-7 text-slate-900">{nonGeoPrimarySummary}</p>
               ) : null}
               {nonGeoSecondarySummary && nonGeoSecondarySummary !== nonGeoPrimarySummary ? (
-                <p style={{ margin: "0.3rem 0 0", color: "#475569", fontSize: "0.94rem", lineHeight: 1.5 }}>{nonGeoSecondarySummary}</p>
+                <p className="mt-1.5 text-sm leading-6 text-slate-600">{nonGeoSecondarySummary}</p>
               ) : null}
             </div>
             {nonGeoTags.length > 0 ? (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+              <div className="flex flex-wrap gap-2">
                 {nonGeoTags.map((tag) => (
-                  <span key={tag} style={{ padding: "0.15rem 0.5rem", borderRadius: "999px", background: "#f1f5f9", color: "#334155", fontSize: "0.8rem" }}>
+                  <span key={tag} className="ekv-chip bg-slate-100 text-slate-700 ring-1 ring-slate-200">
                     {tag}
                   </span>
                 ))}
@@ -579,33 +579,31 @@ export function LibraryDetailPage() {
         </section>
       )}
       {isGeoSection ? (
-        <section style={{ border: "1px solid #dbeafe", borderRadius: "0.75rem", padding: "0.8rem", background: "#eff6ff", marginBottom: "1rem" }}>
-          <h3 style={{ marginTop: 0, marginBottom: "0.45rem" }}>Actions</h3>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
-            <a href="#quick-engineering-view" style={{ padding: "0.35rem 0.6rem", borderRadius: "0.5rem", border: "1px solid #bfdbfe", background: "#fff", textDecoration: "none", color: "inherit" }}>Read Quick Engineering View</a>
-            {isGeoFeature ? <a href="#reporting-expressions" style={{ padding: "0.35rem 0.6rem", borderRadius: "0.5rem", border: "1px solid #bfdbfe", background: "#fff", textDecoration: "none", color: "inherit" }}>Reuse Reporting Phrases</a> : null}
-            <a href="#personal-notes" style={{ padding: "0.35rem 0.6rem", borderRadius: "0.5rem", border: "1px solid #bfdbfe", background: "#fff", textDecoration: "none", color: "inherit" }}>Add Or Update Personal Note</a>
-            <button type="button" onClick={handleStartEdit} style={{ padding: "0.35rem 0.6rem", borderRadius: "0.5rem", border: "1px solid #bfdbfe", background: "#fff", cursor: "pointer" }}>Edit Item</button>
-            <button type="button" onClick={() => setShowDeleteConfirm(true)} style={{ padding: "0.35rem 0.6rem", borderRadius: "0.5rem", border: "1px solid #fecaca", background: "#fff", color: "#dc2626", cursor: "pointer" }}>Delete Item</button>
-            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploadingImage} style={{ padding: "0.35rem 0.6rem", borderRadius: "0.5rem", border: "1px solid #bfdbfe", background: "#fff", cursor: "pointer" }}>
-              {isUploadingImage ? "Uploading..." : "Upload Image"}
+        <section className="mb-4 rounded-2xl border border-sky-200 bg-sky-50 p-3">
+          <h3 className="mb-2 text-base font-semibold text-slate-900">Actions</h3>
+          <div className="flex flex-wrap gap-2">
+            <a href="#quick-engineering-view" className="ekv-button-compact">Quick View</a>
+            {isGeoFeature ? <a href="#reporting-expressions" className="ekv-button-compact">Phrases</a> : null}
+            <a href="#personal-notes" className="ekv-button-compact">Notes</a>
+            <button type="button" onClick={handleStartEdit} className="ekv-button-compact">Edit</button>
+            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="ekv-button-danger">Delete</button>
+            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploadingImage} className="ekv-button-compact">
+              {isUploadingImage ? "Uploading..." : "Image"}
             </button>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: "none" }} accept="image/*" />
           </div>
-          <p style={{ margin: "0.5rem 0 0", color: "#64748b", fontSize: "0.88rem" }}>
-            Personal notes stay local to this item.
-          </p>
+          <p className="mt-2 text-sm text-slate-500">Personal notes stay local to this item.</p>
         </section>
       ) : (
-        <section style={{ border: "1px solid #e5e7eb", borderRadius: "0.75rem", padding: "0.7rem 0.8rem", background: "#fcfcfd", marginBottom: "1rem" }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem", alignItems: "center", justifyContent: "space-between" }}>
-            <p style={{ margin: 0, color: "#64748b", fontSize: "0.88rem" }}>Quick actions</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
-              <button type="button" onClick={handleStartEdit} style={{ padding: "0.32rem 0.58rem", borderRadius: "0.45rem", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontSize: "0.9rem" }}>Edit</button>
-              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploadingImage} style={{ padding: "0.32rem 0.58rem", borderRadius: "0.45rem", border: "1px solid #d1d5db", background: "#fff", cursor: "pointer", fontSize: "0.9rem" }}>
-                {isUploadingImage ? "Uploading..." : "Upload Image"}
+        <section className="mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="m-0 text-sm text-slate-500">Quick actions</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={handleStartEdit} className="ekv-button-compact">Edit</button>
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={isUploadingImage} className="ekv-button-compact">
+                {isUploadingImage ? "Uploading..." : "Image"}
               </button>
-              <button type="button" onClick={() => setShowDeleteConfirm(true)} style={{ padding: "0.32rem 0.58rem", borderRadius: "0.45rem", border: "1px solid #fecaca", background: "#fff", color: "#dc2626", cursor: "pointer", fontSize: "0.9rem" }}>Delete</button>
+              <button type="button" onClick={() => setShowDeleteConfirm(true)} className="ekv-button-danger">Delete</button>
               <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: "none" }} accept="image/*" />
             </div>
           </div>
@@ -613,33 +611,27 @@ export function LibraryDetailPage() {
       )}
 
       {isEditing && (
-        <section style={{ border: "2px solid #3b82f6", borderRadius: "0.75rem", padding: "1rem", background: "#f0f9ff", marginBottom: "1rem" }}>
-          <h3 style={{ marginTop: 0 }}>Edit Approved Item</h3>
-          <div style={{ display: "grid", gap: "1rem" }}>
-            <section style={{ border: "1px solid #bfdbfe", borderRadius: "0.65rem", padding: "0.75rem", background: "#ffffff" }}>
-              <p style={{ margin: 0, fontSize: "0.82rem", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>Entry Type</p>
-              <p style={{ margin: "0.3rem 0 0", fontWeight: 700, color: "#0f172a" }}>{detailView.record.itemType}</p>
+        <section className="mb-4 rounded-2xl border-2 border-sky-300 bg-sky-50 p-4">
+          <h3 className="m-0 text-lg font-semibold text-slate-900">Edit Approved Item</h3>
+          <div className="mt-4 grid gap-4">
+            <section className="rounded-xl border border-sky-200 bg-white p-3">
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Entry Type</p>
+              <p className="mt-1 text-base font-semibold text-slate-900">{detailView.record.itemType}</p>
             </section>
             {editSections.map((section) => (
-              <section key={section.title} style={{ border: "1px solid #bfdbfe", borderRadius: "0.65rem", padding: "0.85rem", background: "#ffffff" }}>
-                <h4 style={{ margin: 0, color: "#0f172a" }}>{section.title}</h4>
-                <p style={{ margin: "0.25rem 0 0.75rem", color: "#64748b", fontSize: "0.9rem", lineHeight: 1.45 }}>{section.description}</p>
-                <div style={{ display: "grid", gap: "0.85rem" }}>
+              <section key={section.title} className="rounded-xl border border-sky-200 bg-white p-3.5">
+                <h4 className="m-0 text-base font-semibold text-slate-900">{section.title}</h4>
+                <p className="mt-1 text-sm leading-6 text-slate-500">{section.description}</p>
+                <div className="mt-3 grid gap-3">
                   {section.fields.map((key) => (
-                    <label key={`${section.title}-${key}`} style={{ display: "block" }}>
-                      <span style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#334155", marginBottom: "0.25rem" }}>{getLabel(key)}</span>
+                    <label key={`${section.title}-${key}`} className="grid gap-1.5">
+                      <span className="text-sm font-semibold text-slate-700">{getLabel(key)}</span>
                       <textarea
                         value={String(editFields[key] ?? "")}
                         onChange={(event) => setEditFields((prev) => ({ ...prev, [key]: event.target.value }))}
                         readOnly={key === "sourceReport"}
-                        style={{
-                          width: "100%",
-                          padding: "0.55rem",
-                          borderRadius: "0.45rem",
-                          border: "1px solid #d1d5db",
-                          minHeight: key === "tags" || key === "sourceReport" ? "44px" : key === "canonical_word" || key === "canonical_phrase" || key === "canonical_sentence" || key === "canonical_name" ? "56px" : "88px",
-                          background: key === "sourceReport" ? "#f8fafc" : "white"
-                        }}
+                        className={`ekv-textarea ${key === "sourceReport" ? "bg-slate-50" : ""}`}
+                        style={{ minHeight: key === "tags" || key === "sourceReport" ? "44px" : key === "canonical_word" || key === "canonical_phrase" || key === "canonical_sentence" || key === "canonical_name" ? "56px" : "88px" }}
                       />
                     </label>
                   ))}
@@ -647,11 +639,11 @@ export function LibraryDetailPage() {
               </section>
             ))}
           </div>
-          <div style={{ display: "flex", gap: "0.5rem", marginTop: "1.5rem" }}>
-            <button type="button" onClick={handleSaveEdit} disabled={isSaving} style={{ padding: "0.5rem 1rem", borderRadius: "0.5rem", background: "#3b82f6", color: "#fff", border: "none", cursor: "pointer" }}>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button type="button" onClick={handleSaveEdit} disabled={isSaving} className="ekv-button-primary">
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
-            <button type="button" onClick={() => setIsEditing(false)} style={{ padding: "0.5rem 1rem", borderRadius: "0.5rem", background: "#e5e7eb", color: "#374151", border: "none", cursor: "pointer" }}>
+            <button type="button" onClick={() => setIsEditing(false)} className="ekv-button-secondary">
               Cancel
             </button>
           </div>
@@ -823,17 +815,17 @@ export function LibraryDetailPage() {
         </section>
       ) : null}
 
-      <details style={{ border: "1px solid #e5e7eb", borderRadius: "0.75rem", padding: "0.8rem", background: "#fff" }} open={showSourceDetails} onToggle={(event) => setShowSourceDetails((event.currentTarget as HTMLDetailsElement).open)}>
-        <summary style={{ cursor: "pointer", fontWeight: 700, color: "#0f172a" }}>Source Traceability</summary>
-        {detailView.record.sources.length === 0 ? <p style={{ marginBottom: 0 }}>No source trace found for this item.</p> : null}
-        <div style={{ display: "grid", gap: "0.6rem", marginTop: detailView.record.sources.length > 0 ? "0.75rem" : "0" }}>
+      <details className="rounded-xl border border-slate-200 bg-white p-3.5" open={showSourceDetails} onToggle={(event) => setShowSourceDetails((event.currentTarget as HTMLDetailsElement).open)}>
+        <summary className="cursor-pointer text-sm font-semibold text-slate-900">Source Traceability</summary>
+        {detailView.record.sources.length === 0 ? <p className="mb-0 mt-3 text-sm text-slate-500">No source trace found for this item.</p> : null}
+        <div className={`grid gap-3 ${detailView.record.sources.length > 0 ? "mt-3" : ""}`}>
           {detailView.record.sources.map((source) => (
-            <article key={source.id} style={{ border: "1px solid #e5e7eb", borderRadius: "0.5rem", padding: "0.55rem", background: "#f9fafb" }}>
-              <p style={{ margin: 0 }}><strong>Report:</strong> {source.reportTitle ?? source.reportId ?? "N/A"}</p>
-              <p style={{ margin: "0.2rem 0 0" }}><strong>Project:</strong> {source.reportProject ?? "N/A"}</p>
-              <p style={{ margin: "0.2rem 0 0" }}><strong>Date:</strong> {source.reportDate ?? "N/A"}</p>
-              <p style={{ margin: "0.2rem 0 0" }}><strong>Section:</strong> {source.sourceSection ?? "N/A"}</p>
-              <p style={{ margin: "0.2rem 0 0" }}><strong>Sentence:</strong> {source.sourceSentence ?? source.sourceExcerpt ?? "N/A"}</p>
+            <article key={source.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="m-0 text-sm text-slate-800"><strong>Report:</strong> {source.reportTitle ?? source.reportId ?? "N/A"}</p>
+              <p className="mt-1 text-sm text-slate-700"><strong>Project:</strong> {source.reportProject ?? "N/A"}</p>
+              <p className="mt-1 text-sm text-slate-700"><strong>Date:</strong> {source.reportDate ?? "N/A"}</p>
+              <p className="mt-1 text-sm text-slate-700"><strong>Section:</strong> {source.sourceSection ?? "N/A"}</p>
+              <p className="mt-1 text-sm text-slate-700"><strong>Sentence:</strong> {source.sourceSentence ?? source.sourceExcerpt ?? "N/A"}</p>
             </article>
           ))}
         </div>

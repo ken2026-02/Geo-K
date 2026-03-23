@@ -45,61 +45,70 @@ export function LibrarySearchPage() {
 
   return (
     <AppShell title="Library Search" subtitle="Search approved knowledge." pageDescription={null}>
-      <p><Link to="/library">Back to Library</Link></p>
+      <div className="mb-4">
+        <Link to="/library" className="ekv-button-compact">
+          Back to Library
+        </Link>
+      </div>
 
-      <section style={{ border: "1px solid #e5e7eb", borderRadius: "0.75rem", padding: "0.75rem", marginBottom: "1rem", background: "#fff" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
-          <h3 style={{ margin: 0 }}>Search Filters</h3>
+      <section className="ekv-card mb-4 p-3 sm:p-4">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <h3 className="m-0 text-lg font-semibold text-slate-900">Search Filters</h3>
           <InlineInfo title="Library search">
             Search covers approved library items only, including requirements and methods. Personal notes stay inside each item detail page.
           </InlineInfo>
         </div>
-        <div style={{ display: "grid", gap: "0.5rem" }}>
-          <label>
-            Query
-            <input value={queryText} onChange={(event) => setQueryText(event.target.value)} placeholder="Search normalized approved text" style={{ width: "100%" }} />
+        <div className="grid gap-2.5">
+          <label className="grid gap-1.5">
+            <span className="ekv-label">Query</span>
+            <input value={queryText} onChange={(event) => setQueryText(event.target.value)} placeholder="Search normalized approved text" className="ekv-input" />
           </label>
-          <label>
-            Item Type
-            <select value={itemType} onChange={(event) => setItemType(event.target.value as ItemTypeFilter)} style={{ width: "100%" }}>
-              <option value="all">All</option>
-              {groupOrder.map((group) => (
-                <option key={group.key} value={group.key}>{group.label}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Category
-            <select value={category} onChange={(event) => setCategory(event.target.value)} style={{ width: "100%" }}>
-              <option value="all">All</option>
-              {options.categories.map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Function Type
-            <select value={functionType} onChange={(event) => setFunctionType(event.target.value)} style={{ width: "100%" }}>
-              <option value="all">All</option>
-              {options.functionTypes.map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Scenario Type
-            <select value={scenarioType} onChange={(event) => setScenarioType(event.target.value)} style={{ width: "100%" }}>
-              <option value="all">All</option>
-              {options.scenarioTypes.map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
-          </label>
+          <details className="rounded-2xl border border-slate-200 bg-slate-50">
+            <summary className="cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-slate-800">More filters</summary>
+            <div className="grid gap-2.5 px-3.5 pb-3.5 sm:grid-cols-2">
+              <label className="grid gap-1.5">
+                <span className="ekv-label">Item Type</span>
+                <select value={itemType} onChange={(event) => setItemType(event.target.value as ItemTypeFilter)} className="ekv-select">
+                  <option value="all">All</option>
+                  {groupOrder.map((group) => (
+                    <option key={group.key} value={group.key}>{group.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1.5">
+                <span className="ekv-label">Category</span>
+                <select value={category} onChange={(event) => setCategory(event.target.value)} className="ekv-select">
+                  <option value="all">All</option>
+                  {options.categories.map((value) => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1.5">
+                <span className="ekv-label">Function Type</span>
+                <select value={functionType} onChange={(event) => setFunctionType(event.target.value)} className="ekv-select">
+                  <option value="all">All</option>
+                  {options.functionTypes.map((value) => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="grid gap-1.5">
+                <span className="ekv-label">Scenario Type</span>
+                <select value={scenarioType} onChange={(event) => setScenarioType(event.target.value)} className="ekv-select">
+                  <option value="all">All</option>
+                  {options.scenarioTypes.map((value) => (
+                    <option key={value} value={value}>{value}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </details>
         </div>
-        <p style={{ marginBottom: 0, color: "#4b5563" }}>Total results: {result.total}</p>
+        <p className="mt-3 mb-0 text-sm text-slate-500">Total results: {result.total}</p>
       </section>
 
-      <div style={{ display: "grid", gap: "1rem" }}>
+      <div className="grid gap-4">
         {groupOrder.map((group) => {
           const groupItems = result.grouped[group.key];
           if (groupItems.length === 0) {
@@ -108,14 +117,26 @@ export function LibrarySearchPage() {
 
           return (
             <section key={group.key}>
-              <h3 style={{ marginBottom: "0.5rem" }}>{group.label} ({groupItems.length})</h3>
-              <div style={{ display: "grid", gap: "0.5rem" }}>
+              <div className="mb-2 flex items-center gap-2">
+                <h3 className="m-0 text-lg font-semibold text-slate-900">{group.label}</h3>
+                <span className="text-sm text-slate-500">({groupItems.length})</span>
+              </div>
+              <div className="grid gap-2.5">
                 {groupItems.map((item) => (
-                  <article key={`${item.itemType}-${item.itemId}`} style={{ border: "1px solid #e5e7eb", borderRadius: "0.75rem", padding: "0.75rem", background: "#fff" }}>
-                    <Link to={searchService.getDetailPath(item.itemType, item.itemId)} style={{ display: "block", fontWeight: 600, paddingBottom: "0.25rem" }}>{item.title}</Link>
-                    <p style={{ margin: "0.3rem 0 0", color: "#4b5563" }}>{item.snippet ?? "No snippet"}</p>
-                    <p style={{ margin: "0.25rem 0 0", color: "#4b5563" }}>
-                      category: {item.category ?? "N/A"} | function / authority: {item.functionType ?? "N/A"} | scenario / jurisdiction: {item.scenarioType ?? "N/A"}
+                  <article key={`${item.itemType}-${item.itemId}`} className="ekv-card rounded-[1.35rem] p-3">
+                    <Link to={searchService.getDetailPath(item.itemType, item.itemId)} className="block text-[1.02rem] font-semibold leading-6 text-slate-900 hover:text-indigo-700">
+                      {item.title}
+                    </Link>
+                    <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                      {item.snippet ?? "No snippet"}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {item.category ? <span className="ekv-chip bg-slate-100 text-slate-700 ring-1 ring-slate-200">{item.category}</span> : null}
+                      {item.functionType ? <span className="ekv-chip bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200">{item.functionType}</span> : null}
+                      {item.scenarioType ? <span className="ekv-chip bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200">{item.scenarioType}</span> : null}
+                    </div>
+                    <p className="mt-2 text-xs leading-5 text-slate-500">
+                      authority: {item.functionType ?? "N/A"} | jurisdiction: {item.scenarioType ?? "N/A"}
                     </p>
                   </article>
                 ))}

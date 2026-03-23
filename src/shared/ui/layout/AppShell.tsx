@@ -106,8 +106,8 @@ export function AppShell({ title, subtitle, pageDescription, children }: AppShel
       <main style={{ maxWidth: "1120px", margin: "0 auto", padding: "1rem" }}>
         <section
           style={{
-            marginBottom: "1rem",
-            padding: "1rem",
+            marginBottom: "0.75rem",
+            padding: "0.85rem 1rem",
             borderRadius: "1rem",
             background: "rgba(255, 255, 255, 0.84)",
             border: "1px solid rgba(203, 213, 225, 0.8)",
@@ -216,6 +216,13 @@ export function AppShell({ title, subtitle, pageDescription, children }: AppShel
           }
         }
         @media (max-width: 879px) {
+          .app-shell-mobile-nav {
+            position: fixed !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            transform: translateZ(0);
+          }
           .app-shell-desktop-nav {
             display: none !important;
           }

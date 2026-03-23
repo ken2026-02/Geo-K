@@ -16,6 +16,7 @@ import {
 } from "../../features/learning/classification";
 import { ConfirmDialog } from "../../shared/ui/feedback/ConfirmDialog";
 import { FeedbackBanner } from "../../shared/ui/feedback/FeedbackBanner";
+import { InlineInfo } from "../../shared/ui/feedback/InlineInfo";
 import { AppShell } from "../../shared/ui/layout/AppShell";
 import { LearningModuleService } from "../../services/learning/learningModuleService";
 import { LearningSubnav } from "./LearningSubnav";
@@ -561,25 +562,20 @@ export function LearningManagePage() {
         {error ? <FeedbackBanner tone="error" message={error} /> : null}
       </div>
 
-      <section className="ekv-card mt-4 p-3.5 sm:p-4.5">
+      <section className="ekv-card mt-2 p-2.5 sm:p-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className={sectionTitleClass}>Active Learning List</h3>
-              <details className="text-sm">
-                <summary className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-500">i</summary>
-                <div className="mt-2 max-w-md rounded-2xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-600 shadow-sm">
-                  Manage one standard, manual, report, or notebook at a time. Study and batch actions stay inside the selected list.
-                </div>
-              </details>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className={sectionTitleClass}>Active Learning List</h3>
+            <InlineInfo title="Active learning list">
+              Manage one standard, manual, report, or notebook at a time. Study and batch actions stay inside the selected list.
+            </InlineInfo>
           </div>
           <Link to={`/learning/import${activeCollectionId ? `?collection=${activeCollectionId}` : ""}`} className="ekv-button-compact">
             Open import
           </Link>
         </div>
 
-        <div className="mt-3 grid grid-cols-1 gap-2.5">
+        <div className="mt-2 grid grid-cols-1 gap-1.5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <label className={inputLabelClass}>
             <span className="ekv-label">Current list</span>
             <select
@@ -597,7 +593,7 @@ export function LearningManagePage() {
             </select>
           </label>
           {activeCollection && (activeCollection.sourceType || activeCollection.documentNumber || activeCollection.authority) ? (
-            <div className="flex flex-wrap gap-2 text-sm">
+            <div className="flex flex-wrap gap-2 text-sm lg:justify-end">
               <span className="ekv-chip bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200">{activeCollection.sourceType}</span>
               {activeCollection.documentNumber ? <span className="ekv-chip bg-slate-100 text-slate-600 ring-1 ring-slate-200">{activeCollection.documentNumber}</span> : null}
               {activeCollection.authority ? <span className="ekv-chip bg-cyan-50 text-cyan-700 ring-1 ring-cyan-200">{activeCollection.authority}</span> : null}
@@ -606,25 +602,20 @@ export function LearningManagePage() {
         </div>
       </section>
 
-      <section className="ekv-card mt-4 p-3.5 sm:p-4.5">
+      <section className="ekv-card mt-2 p-2.5 sm:p-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className={sectionTitleClass}>Manage Items</h3>
-              <details className="text-sm">
-                <summary className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-500">i</summary>
-                <div className="mt-2 max-w-md rounded-2xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-600 shadow-sm">
-                  Search first, then use page-scoped selection for batch updates, export, or cleanup.
-                </div>
-              </details>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className={sectionTitleClass}>Manage Items</h3>
+            <InlineInfo title="Manage items">
+              Search first, then use page-scoped selection for batch updates, export, or cleanup.
+            </InlineInfo>
           </div>
           <button type="button" onClick={() => setShowFilters((value) => !value)} className="ekv-button-compact">
             {showFilters ? "Hide Filters" : "Show Filters"}
           </button>
         </div>
 
-        <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <label className={inputLabelClass}>
             <span className="ekv-label">Search</span>
             <input
@@ -685,29 +676,29 @@ export function LearningManagePage() {
           </div>
         ) : null}
 
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2.5">
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => void handleExport()} disabled={isProcessing} className="ekv-button-primary">
-              Export Learning Pack v1 JSON
+        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+            <button type="button" onClick={() => void handleExport()} disabled={isProcessing} className="ekv-button-primary px-2.5 text-xs sm:px-4 sm:text-sm">
+              Export
             </button>
             <button
               type="button"
               onClick={handleSelectPage}
               disabled={pageItems.length === 0 || allPageSelected || isProcessing}
-              className="ekv-button-compact"
+              className="ekv-button-compact px-2.5 text-xs sm:px-3 sm:text-sm"
             >
-              Select page
+              Select
             </button>
             <button
               type="button"
               onClick={clearSelection}
               disabled={selectedItemIds.length === 0 || isProcessing}
-              className="ekv-button-compact"
+              className="ekv-button-compact px-2.5 text-xs sm:px-3 sm:text-sm"
             >
-              Clear selection
+              Clear
             </button>
           </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 sm:text-sm">
             <span>Filtered: {filteredItems.length} / {items.length}</span>
             <span>Page: {filteredItems.length === 0 ? 0 : safePage} / {totalPages}</span>
             <span>Selected: {selectedItemIds.length}</span>
@@ -822,7 +813,7 @@ export function LearningManagePage() {
         </section>
       ) : null}
 
-      <section className="ekv-card mt-4 p-3.5 sm:p-4.5">
+      <section className="ekv-card mt-2 p-2.5 sm:p-3">
         <details>
           <summary className="cursor-pointer text-sm font-semibold text-slate-800">Quick Multi-line Add</summary>
           <div className="mt-3 space-y-3">
@@ -854,42 +845,44 @@ export function LearningManagePage() {
         </details>
       </section>
 
-      <section className="ekv-card mt-4 p-3.5 sm:p-4.5">
-        <h3 className={sectionTitleClass}>Learning Items</h3>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <p className="text-sm text-slate-500">Tap a row to inspect details. Edit only when you need to change fields.</p>
+      <section className="ekv-card mt-2 p-2.5 sm:p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className={sectionTitleClass}>Learning Items</h3>
+          <div className="flex items-center gap-2">
+            <InlineInfo title="Learning items">
+              Tap a row to inspect details. Edit only when you need to change fields.
+            </InlineInfo>
+            {filteredItems.length > 0 ? (
+              <span className="text-xs text-slate-500 sm:text-sm">
+                {pageSize === "all"
+                  ? `${filteredItems.length} items`
+                  : `P ${safePage}/${totalPages} · ${pageRangeStart}-${pageRangeEnd} / ${filteredItems.length}`}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {items.length === 0 ? <p className="mt-4 text-sm text-slate-500">No learning items yet. Import or add lines first.</p> : null}
         {items.length > 0 && filteredItems.length === 0 ? <p className="mt-4 text-sm text-slate-500">No learning items match the current search and filters.</p> : null}
 
-        {filteredItems.length > 0 ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2.5">
-            <div className="text-sm text-slate-500">
-              {pageSize === "all"
-                ? `Showing all ${filteredItems.length} filtered items`
-                : `Page ${safePage} / ${totalPages} | Items ${pageRangeStart}-${pageRangeEnd} of ${filteredItems.length}`}
-            </div>
-            {pageSize !== "all" ? (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPage((value) => Math.max(1, value - 1))}
-                  disabled={safePage <= 1}
-                  className="ekv-button-compact"
-                >
-                  Previous page
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
-                  disabled={safePage >= totalPages}
-                  className="ekv-button-compact"
-                >
-                  Next page
-                </button>
-              </div>
-            ) : null}
+        {filteredItems.length > 0 && pageSize !== "all" ? (
+          <div className="mt-2.5 flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
+              disabled={safePage <= 1}
+              className="ekv-button-compact"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
+              disabled={safePage >= totalPages}
+              className="ekv-button-compact"
+            >
+              Next
+            </button>
           </div>
         ) : null}
 
@@ -911,10 +904,10 @@ export function LearningManagePage() {
             return (
               <article
                 key={item.id}
-                className={`overflow-hidden rounded-[1.75rem] border bg-white shadow-sm transition-all ${isSelected || isExpanded ? "border-indigo-300 ring-2 ring-indigo-200/80" : "border-slate-200 hover:border-slate-300"} ${isEditing ? "bg-indigo-50/[0.03]" : ""}`}
+                className={`overflow-hidden rounded-[1.6rem] border bg-white shadow-sm transition-all ${isSelected || isExpanded ? "border-indigo-300 ring-2 ring-indigo-200/80" : "border-slate-200 hover:border-slate-300"} ${isEditing ? "bg-indigo-50/[0.03]" : ""}`}
               >
                 <div className={`grid grid-cols-[auto_minmax(0,1fr)] gap-0 ${isExpanded ? "border-b border-slate-200" : ""}`}>
-                  <div className="px-4 py-4 sm:px-5">
+                  <div className="px-3 py-3.5 sm:px-4">
                     <input
                       type="checkbox"
                       checked={isSelected}
@@ -923,13 +916,13 @@ export function LearningManagePage() {
                       className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                     />
                   </div>
-                  <div className="w-full px-2 py-3 pr-4 sm:px-3 sm:py-3.5">
+                  <div className="w-full px-2 py-2.5 pr-3 sm:px-3 sm:py-3">
                     <button
                       type="button"
                       onClick={() => toggleExpand(item)}
                       className="w-full min-w-0 rounded-2xl px-1 py-1 text-left transition-all hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 active:scale-[0.995]"
                     >
-                      <div className="min-w-0 space-y-2.5">
+                      <div className="min-w-0 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className={`${chipBaseClass} ${getLearningTypeBadgeClasses(item.type)}`}>{item.type.replaceAll("_", " ")}</span>
                           {item.domain ? (
@@ -939,11 +932,11 @@ export function LearningManagePage() {
                           ) : null}
                           <span className={`${chipBaseClass} ${getStatusBadgeClasses(status)}`}>{status}</span>
                         </div>
-                        <strong className="block text-base font-semibold leading-6 text-slate-900 line-clamp-3 sm:line-clamp-2">
+                        <strong className="block text-[15px] font-semibold leading-6 text-slate-900 line-clamp-3 sm:text-base sm:line-clamp-2">
                           {item.content}
                         </strong>
                         {summaryText ? (
-                          <span className="block text-sm leading-6 text-slate-600 line-clamp-2">
+                          <span className="block text-sm leading-5 text-slate-600 line-clamp-2">
                             {summaryText}
                           </span>
                         ) : null}
@@ -971,7 +964,7 @@ export function LearningManagePage() {
                 </div>
 
                 {isExpanded ? (
-                  <div className="space-y-3 bg-slate-50/80 px-4 pb-4 pt-3 sm:px-5 sm:pb-5">
+                  <div className="space-y-3 bg-slate-50/80 px-3.5 pb-3.5 pt-3 sm:px-4 sm:pb-4">
                     <div className="rounded-3xl border border-indigo-100 bg-indigo-50/80 p-3">
                       <strong className="block text-sm font-semibold text-indigo-800">Item detail</strong>
                       <div className="mt-2.5 space-y-2.5">
@@ -984,7 +977,7 @@ export function LearningManagePage() {
                       </div>
                     </div>
 
-                    <p className="text-xs leading-5 text-slate-500">
+                    <p className="text-[11px] leading-5 text-slate-500">
                       {item.id} | created: {item.createdAt} | updated: {item.updatedAt}
                     </p>
 
@@ -1001,7 +994,7 @@ export function LearningManagePage() {
 
                     {isEditing ? (
                       <>
-                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-2">
                       <label className={inputLabelClass}>
                         <span className="ekv-label">Type</span>
                         <select
@@ -1124,7 +1117,7 @@ export function LearningManagePage() {
         </div>
 
         {filteredItems.length > 0 && pageSize !== "all" ? (
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <div className="text-sm text-slate-500">Page {safePage} / {totalPages}</div>
             <div className="flex flex-wrap gap-3">
               <button

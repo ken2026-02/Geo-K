@@ -155,7 +155,9 @@ export function LibraryListPage() {
 
   return (
     <AppShell title={sectionLabels[validSection]} subtitle={isGeoSection(validSection) ? "Browse approved items." : "Approved items only."} pageDescription={null}>
-      <p><Link to="/library">Back to Library Home</Link></p>
+      <div className="mb-4">
+        <Link to="/library" className="ekv-button-compact">Back to Library Home</Link>
+      </div>
 
       {validSection && isGeoSection(validSection) ? (
         <section style={{ border: "1px solid #dbeafe", borderRadius: "0.75rem", padding: "0.75rem", background: "#eff6ff", marginBottom: "1rem" }}>
@@ -208,54 +210,60 @@ export function LibraryListPage() {
       ) : null}
 
       {items.length === 0 ? (
-        <section style={{ border: "1px solid #e5e7eb", borderRadius: "0.75rem", padding: "0.85rem", background: "#fff" }}>
-          <p style={{ margin: 0 }}>
+        <section className="rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="m-0 text-sm leading-6 text-slate-700">
             No approved items match the current filters. Try clearing category/subtype filters or switching grouping mode.
           </p>
           {isGeoSection(validSection) ? (
-            <p style={{ margin: "0.45rem 0 0", color: "#6b7280", fontSize: "0.9rem" }}>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
               If you still cannot find an item, check whether it is pending review in Inbox or only captured as a personal note on a detail page.
             </p>
           ) : null}
         </section>
       ) : null}
 
-      <div style={{ display: "grid", gap: "1rem" }}>
+      <div className="grid gap-4">
         {groupedItems.map((group) => (
           <section key={group.key}>
-            {validSection && isGeoSection(validSection) && groupedItems.length > 1 ? <h3 style={{ marginBottom: "0.5rem" }}>{group.label}</h3> : null}
-            <ul style={{ display: "grid", gap: "0.6rem", padding: 0, listStyle: "none", margin: 0 }}>
+            {validSection && isGeoSection(validSection) && groupedItems.length > 1 ? <h3 className="mb-2 text-lg font-semibold text-slate-900">{group.label}</h3> : null}
+            <ul className="m-0 grid list-none gap-3 p-0">
               {group.items.map((item) => {
-                const badgeStyle = provenanceBadgeStyle(item.provenanceType);
                 const secondaryText = detailLine(item, validSection);
                 const summaryChip = listSummaryChip(item, validSection);
                 return (
-                  <li key={item.id} style={{ border: "1px solid #e5e7eb", borderRadius: "0.85rem", padding: "0.85rem", background: "#fff" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", flexWrap: "wrap", alignItems: "flex-start" }}>
-                      <div style={{ display: "grid", gap: "0.35rem", flex: 1, minWidth: 0 }}>
-                        {summaryChip ? (
-                          <span style={{ padding: "0.15rem 0.45rem", borderRadius: "999px", fontSize: "0.78rem", background: "#eef4ff", color: "#1e3a8a", width: "fit-content" }}>
-                            {summaryChip}
-                          </span>
-                        ) : null}
-                        <Link to={`/library/${validSection}/${item.id}`} style={{ fontWeight: 700, display: "block", color: "#0f172a", textDecoration: "none", lineHeight: 1.25 }}>
+                  <li key={item.id} className="rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap gap-1.5">
+                          {summaryChip ? (
+                            <span className="ekv-chip bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200">
+                              {summaryChip}
+                            </span>
+                          ) : null}
+                          {isGeoSection(validSection) ? (
+                            <span
+                              className="ekv-chip"
+                              style={provenanceBadgeStyle(item.provenanceType)}
+                            >
+                              {toProvenanceLabel(item.provenanceType)}
+                            </span>
+                          ) : null}
+                        </div>
+                        <Link to={`/library/${validSection}/${item.id}`} className="mt-2 block text-[1.02rem] font-semibold leading-6 text-slate-900 hover:text-indigo-700">
                           {item.title}
                         </Link>
+                        {secondaryText ? (
+                          <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                            {secondaryText}
+                          </p>
+                        ) : null}
+                        {validSection && isGeoSection(validSection) ? (
+                          <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                            {previewSnippet(item)}
+                          </p>
+                        ) : null}
                       </div>
-                      {isGeoSection(validSection) ? (
-                        <span style={{ padding: "0.15rem 0.45rem", borderRadius: "999px", fontSize: "0.78rem", ...badgeStyle }}>
-                          {toProvenanceLabel(item.provenanceType)}
-                        </span>
-                      ) : null}
                     </div>
-                    {secondaryText ? (
-                      <p style={{ margin: "0.45rem 0 0", color: "#475569", fontSize: "0.92rem", lineHeight: 1.5 }}>
-                        {secondaryText}
-                      </p>
-                    ) : null}
-                    {validSection && isGeoSection(validSection) ? (
-                      <p style={{ margin: "0.35rem 0 0", color: "#111827", fontSize: "0.92rem" }}>{previewSnippet(item)}</p>
-                    ) : null}
                   </li>
                 );
               })}

@@ -8,7 +8,7 @@ import type {
   LearningItemType
 } from "../../data/repositories/interfaces";
 import { buildLearningDomainOptions, filterLearningItems, getLearningStatus } from "../../features/learning/classification";
-import { FeedbackBanner } from "../../shared/ui/feedback/FeedbackBanner";
+import { InlineInfo } from "../../shared/ui/feedback/InlineInfo";
 import { AppShell } from "../../shared/ui/layout/AppShell";
 import { LearningModuleService } from "../../services/learning/learningModuleService";
 import { LearningSubnav } from "./LearningSubnav";
@@ -51,6 +51,15 @@ function getTotalPages(totalItems: number, pageSize: number): number {
   }
 
   return Math.ceil(totalItems / pageSize);
+}
+
+function compareStudyItems(left: LearningItemRecord, right: LearningItemRecord): number {
+  const createdDelta = new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
+  if (createdDelta !== 0) {
+    return createdDelta;
+  }
+
+  return left.id.localeCompare(right.id);
 }
 
 function hasStudyDetails(item: LearningItemRecord): boolean {
@@ -114,6 +123,9 @@ export function LearningStudyPage() {
   const learningTypes = learningService.getLearningTypes();
   const learningStatuses = learningService.getSuggestedStatuses();
   const studyContentRef = useRef<HTMLElement | null>(null);
+  const scrollRestoreRef = useRef<number | null>(null);
+  const focusRestoreItemIdRef = useRef<string | null>(null);
+  const focusRestoreTopRef = useRef<number | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [collections, setCollections] = useState<LearningCollectionRecord[]>([]);
@@ -134,8 +146,6 @@ export function LearningStudyPage() {
   const [showStickySearch, setShowStickySearch] = useState(false);
   const [showStickyFilters, setShowStickyFilters] = useState(false);
   const [lastStudiedLabel, setLastStudiedLabel] = useState<string>();
-  const [message, setMessage] = useState<string>();
-  const [error, setError] = useState<string>();
   const [isProcessing, setIsProcessing] = useState(false);
   const deferredSearchText = useDeferredValue(searchText);
   const activeCollectionId = searchParams.get("collection") ?? "";
@@ -164,11 +174,6 @@ export function LearningStudyPage() {
     void refreshItems();
   }, [activeCollectionId]);
 
-  function clearFeedback(): void {
-    setMessage(undefined);
-    setError(undefined);
-  }
-
   const domainOptions = useMemo(() => buildLearningDomainOptions(allItems.map((item) => item.domain)), [allItems]);
 
   const items = useMemo(() => (
@@ -177,7 +182,7 @@ export function LearningStudyPage() {
       domain: domainFilter,
       status: statusFilter,
       searchText: deferredSearchText
-    })
+    }).sort(compareStudyItems)
   ), [allItems, deferredSearchText, domainFilter, statusFilter, typeFilter]);
 
   useEffect(() => {
@@ -232,7 +237,9 @@ export function LearningStudyPage() {
   async function handleSetStatus(item: LearningItemRecord, status: LearningItemStatus): Promise<void> {
     if (isProcessing) return;
     setIsProcessing(true);
-    clearFeedback();
+    scrollRestoreRef.current = window.scrollY;
+    focusRestoreItemIdRef.current = item.id;
+    focusRestoreTopRef.current = (document.querySelector(`[data-study-item-id="${item.id}"]`) as HTMLElement | null)?.getBoundingClientRect().top ?? null;
 
     try {
       await learningService.updateItem({
@@ -247,13 +254,28 @@ export function LearningStudyPage() {
         tags: item.tags,
         sourceReport: item.sourceReport
       });
-      setMessage(`Set learning item ${item.id} to ${status}.`);
       setLastStudiedLabel(`${truncateText(item.content, 36)} | ${status}`);
       await refreshItems();
+      window.requestAnimationFrame(() => {
+        const selector = focusRestoreItemIdRef.current
+          ? `[data-study-item-id="${focusRestoreItemIdRef.current}"]`
+          : null;
+        const target = selector ? document.querySelector(selector) as HTMLElement | null : null;
+        if (target && focusRestoreTopRef.current != null) {
+          const nextTop = target.getBoundingClientRect().top;
+          const delta = nextTop - focusRestoreTopRef.current;
+          if (Math.abs(delta) > 1) {
+            window.scrollBy({ top: delta });
+          }
+        } else if (scrollRestoreRef.current != null) {
+          window.scrollTo({ top: scrollRestoreRef.current });
+        }
+        scrollRestoreRef.current = null;
+        focusRestoreItemIdRef.current = null;
+        focusRestoreTopRef.current = null;
+      });
     } catch (updateError) {
       console.error("Failed to update status:", updateError);
-      const errorMessage = updateError instanceof Error ? updateError.message : "Status update failed.";
-      setError(errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -280,7 +302,6 @@ export function LearningStudyPage() {
     setShowMeaningPreview(false);
     setShowStickyFilters(false);
     setShowStickySearch(false);
-    clearFeedback();
   }
 
   const listPageSize = listDisplayCount === "all" ? Math.max(items.length, 1) : Number(listDisplayCount);
@@ -306,25 +327,17 @@ export function LearningStudyPage() {
     >
       <LearningSubnav />
 
-      <section className={`${studySectionClass} mt-4 p-3.5 sm:p-4.5`}>
+      <section className={`${studySectionClass} mt-2 p-2.5 sm:p-3`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-lg font-semibold text-slate-900">Active Learning List</h3>
-              <details className="text-sm">
-                <summary className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-500">i</summary>
-                <div className="mt-2 max-w-md rounded-2xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-600 shadow-sm">
-                  Stay inside one standard, manual, or report while you study. Queue, pagination, and review status stay scoped to the selected list.
-                </div>
-              </details>
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-lg font-semibold text-slate-900">Active Learning List</h3>
           </div>
           <Link to={`/learning/import${activeCollectionId ? `?collection=${activeCollectionId}` : ""}`} className="ekv-button-compact">
             Open import
           </Link>
         </div>
 
-        <div className="mt-3 grid grid-cols-1 gap-2.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+        <div className="mt-2 grid grid-cols-1 gap-1.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
           <label className="grid gap-2">
             <span className={fieldLabelClass}>Current list</span>
             <select
@@ -351,27 +364,19 @@ export function LearningStudyPage() {
         </div>
       </section>
 
-      <section className={`${studySectionClass} mt-4 p-3.5 sm:p-4.5`}>
-        <div className="space-y-3.5">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
+      <section className={`${studySectionClass} mt-2 p-2.5 sm:p-3 ${studyStarted ? "hidden" : ""}`}>
+        <div className="space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
               <h3 className="text-lg font-semibold text-slate-900">Start Study</h3>
-              <details className="text-sm">
-                <summary className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-semibold text-slate-500">i</summary>
-                <div className="mt-2 max-w-md rounded-2xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-600 shadow-sm">
-                  Use List mode to scan many items quickly. Use Card mode to focus on fewer items with staged reveals.
-                </div>
-              </details>
+              <span className="text-xs text-slate-500 sm:text-sm">{items.length} items</span>
             </div>
+            {lastStudiedLabel ? <span className="truncate text-xs text-slate-500 sm:text-sm">Last: {lastStudiedLabel}</span> : null}
           </div>
 
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-500">
-            <span>{items.length} items available</span>
-            {lastStudiedLabel ? <span>Last studied: {lastStudiedLabel}</span> : null}
-          </div>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-2">
-              <span className={fieldLabelClass}>View mode</span>
+          <div className="grid grid-cols-1 gap-2 md:grid-cols-[auto_minmax(0,1fr)]">
+            <div className="space-y-1.5">
+              <span className={fieldLabelClass}>View</span>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => setViewMode("list")} disabled={viewMode === "list"} className={viewMode === "list" ? primaryActionClass : neutralActionClass}>
                   List
@@ -382,25 +387,27 @@ export function LearningStudyPage() {
               </div>
             </div>
 
-            <label className="grid gap-2 sm:col-span-1 lg:col-span-2">
-              <span className={fieldLabelClass}>Search</span>
-              <input
-                value={searchText}
-                onChange={(event) => setSearchText(event.target.value)}
-                placeholder="Search content, meaning, example, note, tags, source"
-                className="ekv-input"
-              />
-            </label>
+            <div className="grid grid-cols-[minmax(0,1fr)_110px] gap-2 sm:grid-cols-[minmax(0,1fr)_130px]">
+              <label className="grid gap-1.5">
+                <span className={fieldLabelClass}>Search</span>
+                <input
+                  value={searchText}
+                  onChange={(event) => setSearchText(event.target.value)}
+                  placeholder="Search content, meaning, example, note, tags, source"
+                  className="ekv-input"
+                />
+              </label>
 
-            <label className="grid gap-2">
-              <span className={fieldLabelClass}>Type</span>
-              <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as LearningFilter)} className="ekv-select">
-                <option value="all">all</option>
-                {learningTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </label>
+              <label className="grid gap-1.5">
+                <span className={fieldLabelClass}>Type</span>
+                <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as LearningFilter)} className="ekv-select">
+                  <option value="all">all</option>
+                  {learningTypes.map((type) => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
 
           <details className="rounded-2xl border border-slate-200 bg-slate-50">
@@ -463,21 +470,13 @@ export function LearningStudyPage() {
           <button type="button" onClick={handleStartStudy} disabled={items.length === 0} className="ekv-button-primary w-full">
             {studyStarted ? "Continue Study" : "Start Study"}
           </button>
-          <details className="rounded-2xl border border-slate-200 bg-slate-50">
-            <summary className="cursor-pointer px-3.5 py-2.5 text-sm font-semibold text-slate-700">Study actions guide</summary>
-            <div className="space-y-1 px-3.5 pb-3.5 text-sm leading-6 text-slate-600">
-              <p><strong className="text-slate-700">Know:</strong> promote the item to a longer review interval.</p>
-              <p><strong className="text-slate-700">Review:</strong> keep the item active in the current learning queue.</p>
-              <p><strong className="text-slate-700">Skip:</strong> return the item to the queue without burying it.</p>
-            </div>
-          </details>
         </div>
       </section>
 
       {studyStarted ? (
-        <section ref={studyContentRef} className="mt-4 space-y-4">
-          <div className="sticky top-2 z-10 rounded-3xl border border-cyan-200 bg-white/95 p-2.5 shadow-sm backdrop-blur">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+        <section ref={studyContentRef} className="mt-3 space-y-3">
+          <div className="sticky top-2 z-10 rounded-3xl border border-cyan-200 bg-white/95 p-2 shadow-sm backdrop-blur">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => setViewMode("list")} disabled={viewMode === "list"} className={viewMode === "list" ? primaryActionClass : compactStudyActionClass}>
                   List
@@ -486,7 +485,8 @@ export function LearningStudyPage() {
                   Card
                 </button>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-slate-500">{items.length} items</span>
                 <button type="button" onClick={() => setShowStickySearch((value) => !value)} className={compactStudyActionClass}>
                   Search
                 </button>
@@ -497,7 +497,7 @@ export function LearningStudyPage() {
             </div>
 
             {showStickySearch ? (
-              <div className="mt-3">
+              <div className="mt-2.5">
                 <input
                   value={searchText}
                   onChange={(event) => setSearchText(event.target.value)}
@@ -571,13 +571,8 @@ export function LearningStudyPage() {
             ) : null}
           </div>
 
-          <div className="space-y-4">
-            {message ? <FeedbackBanner tone="success" message={message} /> : null}
-            {error ? <FeedbackBanner tone="error" message={error} /> : null}
-          </div>
-
           {items.length === 0 ? (
-            <section className={`${studySectionClass} p-3.5 sm:p-4.5`}>
+            <section className={`${studySectionClass} p-3 sm:p-4`}>
               <h3 className="text-lg font-semibold text-slate-900">No items match your filters</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600">Clear the current filter set to resume study.</p>
               <button type="button" onClick={handleResetFilters} className="ekv-button-compact mt-4">
@@ -587,11 +582,11 @@ export function LearningStudyPage() {
           ) : null}
 
           {items.length > 0 && viewMode === "list" ? (
-            <section className={`${studySectionClass} p-3.5 sm:p-4.5`}>
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <section className={`${studySectionClass} p-2.5 sm:p-3`}>
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900">Scan Mode</h3>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                  <p className="mt-0.5 text-sm leading-5 text-slate-600">
                     {listDisplayCount === "all"
                       ? `Showing all ${items.length} items`
                       : `Page ${safeListPage} / ${listTotalPages} | Items ${listRangeStart}-${listRangeEnd} of ${items.length}`}
@@ -609,7 +604,7 @@ export function LearningStudyPage() {
                 ) : null}
               </div>
 
-              <div className="mt-3 space-y-2.5">
+              <div className="mt-2 space-y-2">
                 {visibleListItems.map((item) => {
                   const expanded = expandedItemIds.includes(item.id);
                   const status = getLearningStatus(item.status);
@@ -618,9 +613,9 @@ export function LearningStudyPage() {
                   const summaryText = getLearningSummaryText(item);
 
                   return (
-                    <article key={item.id} className={`overflow-hidden rounded-[1.5rem] border shadow-sm transition-all ${expanded ? "border-cyan-200 bg-white ring-1 ring-cyan-100" : "border-slate-200 bg-slate-50/60 hover:border-slate-300"}`}>
-                      <div className="p-3.5 sm:p-4">
-                        <div className="mb-2.5 flex flex-wrap items-center gap-2">
+                    <article data-study-item-id={item.id} key={item.id} className={`overflow-hidden rounded-[1.35rem] border shadow-sm transition-all ${expanded ? "border-cyan-200 bg-white ring-1 ring-cyan-100" : "border-slate-200 bg-slate-50/60 hover:border-slate-300"}`}>
+                      <div className="p-3 sm:p-3.5">
+                        <div className="mb-2 flex flex-wrap items-center gap-2">
                           <span className={`${chipBaseClass} ${getLearningTypeBadgeClasses(item.type)}`}>{item.type.replaceAll("_", " ")}</span>
                           {item.tags?.slice(0, 2).map((tag) => (
                             <span key={tag} className={`${chipBaseClass} bg-slate-100 text-slate-600 ring-1 ring-slate-200`}>{tag}</span>
@@ -633,7 +628,7 @@ export function LearningStudyPage() {
                           onClick={() => toggleExpanded(item.id)}
                           className="w-full rounded-2xl text-left transition-all hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 active:scale-[0.995]"
                         >
-                          <div className="text-lg font-semibold leading-7 text-slate-900 line-clamp-3 sm:line-clamp-2">
+                          <div className="text-[1.02rem] font-semibold leading-7 text-slate-900 line-clamp-3 sm:text-lg sm:line-clamp-2">
                             {item.content}
                           </div>
                           {showMeaningPreview && summaryText ? (
@@ -643,7 +638,7 @@ export function LearningStudyPage() {
                           ) : null}
                         </button>
 
-                        <div className="mt-3 grid grid-cols-[repeat(3,minmax(0,1fr))_auto] gap-1.5">
+                        <div className="mt-2.5 grid grid-cols-4 gap-1.5">
                           <button type="button" onClick={() => void handleSetStatus(item, getStudyActionStatus("know"))} disabled={isProcessing} className={compactStudyActionClass}>
                             Know
                           </button>
@@ -656,7 +651,7 @@ export function LearningStudyPage() {
                           <button
                             type="button"
                             onClick={() => toggleExpanded(item.id)}
-                            className="inline-flex min-h-9 items-center justify-center rounded-xl border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:scale-95"
+                            className="inline-flex min-h-9 items-center justify-center rounded-xl border border-slate-300 bg-slate-100 px-2.5 py-2 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:scale-95"
                           >
                             {expanded ? "Less" : "More"}
                           </button>
@@ -664,7 +659,7 @@ export function LearningStudyPage() {
                       </div>
 
                       {expanded ? (
-                        <div className="border-t border-slate-200 bg-white p-3.5 sm:p-4">
+                        <div className="border-t border-slate-200 bg-white p-3 sm:p-3.5">
                           <div className="space-y-3 rounded-3xl border border-slate-200 bg-slate-50 p-3">
                             {detailRows.map((detailRow) => (
                               <div key={detailRow.label}>
@@ -699,7 +694,7 @@ export function LearningStudyPage() {
           ) : null}
 
           {items.length > 0 && viewMode === "card" && currentCardItems.length > 0 ? (
-            <section className={`${studySectionClass} mx-auto max-w-4xl p-3.5 sm:p-4.5`}>
+            <section className={`${studySectionClass} mx-auto max-w-4xl p-3 sm:p-4`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900">Focus Mode</h3>

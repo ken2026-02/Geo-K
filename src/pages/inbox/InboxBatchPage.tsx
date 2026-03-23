@@ -289,56 +289,62 @@ export function InboxBatchPage() {
         onConfirm={() => void handleConfirmAction()}
         onCancel={() => setConfirmAction(null)}
       />
-      <p><Link to="/inbox">Back to Inbox</Link></p>
+      <div className="mb-4">
+        <Link to="/inbox" className="ekv-button-compact min-h-11 px-4">
+          Back to Inbox
+        </Link>
+      </div>
 
-      {message ? <div style={{ marginBottom: "1rem" }}><FeedbackBanner tone="success" message={message} /></div> : null}
-      {error ? <div style={{ marginBottom: "1rem" }}><FeedbackBanner tone="error" message={error} /></div> : null}
+      {message ? <div className="mb-4"><FeedbackBanner tone="success" message={message} /></div> : null}
+      {error ? <div className="mb-4"><FeedbackBanner tone="error" message={error} /></div> : null}
 
       {batch ? (
-        <section style={{ marginBottom: "1rem", padding: "0.75rem", border: "1px solid #e5e7eb", borderRadius: "0.75rem", background: "#fafaf9" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-            <strong>{batch.batchName}</strong>
-            <span style={{ 
-              padding: "0.25rem 0.5rem", 
-              borderRadius: "0.25rem", 
-              fontSize: "0.875rem",
-              background: batch.importStatus === "completed" ? "#dcfce7" : "#fef9c3",
-              color: batch.importStatus === "completed" ? "#166534" : "#854d0e"
-            }}>
+        <section className="ekv-card mb-4 bg-slate-50 p-3 sm:p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <strong className="block text-lg font-semibold text-slate-900">{batch.batchName}</strong>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="ekv-chip bg-slate-100 text-slate-600 ring-1 ring-slate-200">Pending {batch.pendingItems}</span>
+                <span className="ekv-chip bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Approved {batch.approvedItems}</span>
+                <span className="ekv-chip bg-red-50 text-red-700 ring-1 ring-red-200">Rejected {batch.rejectedItems}</span>
+              </div>
+            </div>
+            <span className={`ekv-chip ${batch.importStatus === "completed" ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"}`}>
               {batch.importStatus === "completed" ? "Completed" : "Review In Progress"}
             </span>
           </div>
-          <p style={{ margin: "0.5rem 0 0" }}>Report ID: {batch.sourceReportId ?? "N/A"}</p>
-          <p style={{ margin: "0.25rem 0 0" }}>Project: {batch.sourceReportProject ?? "N/A"}</p>
-          <p style={{ margin: "0.25rem 0 0", color: "#64748b", fontSize: "0.92rem" }}>Pending {batch.pendingItems} | Approved {batch.approvedItems} | Rejected {batch.rejectedItems}</p>
-          <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+          <div className="mt-3 grid gap-1 text-sm text-slate-600">
+            <p className="m-0">Report ID: {batch.sourceReportId ?? "N/A"}</p>
+            <p className="m-0">Project: {batch.sourceReportProject ?? "N/A"}</p>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
             <button 
               onClick={() => void handleCommitApproved()} 
               disabled={isProcessing || batch.importStatus === "completed"} 
-              style={{ padding: "0.5rem 1rem" }}
+              className="ekv-button-primary"
             >
-              Commit Approved to Library
+              Commit
             </button>
             <button 
               onClick={() => setConfirmAction({ kind: "approve_all", label: itemTypeFilter === "all" ? "visible" : toLabel(itemTypeFilter as PendingInboxItemRecord["itemType"]) })} 
               disabled={isProcessing || batch.importStatus === "completed"} 
-              style={{ padding: "0.5rem 1rem", background: "#f3f4f6", border: "1px solid #d1d5db", borderRadius: "0.375rem" }}
+              className="ekv-button-secondary"
             >
-              Approve All {itemTypeFilter === "all" ? "" : toLabel(itemTypeFilter as any)}
+              Approve all
             </button>
-            <Link to="/library" style={{ alignSelf: "center", padding: "0.5rem 1rem", background: "#f3f4f6", borderRadius: "0.375rem", textDecoration: "none", color: "#111827" }}>Open Library</Link>
+            <Link to="/library" className="ekv-button-compact">Library</Link>
           </div>
           {batch.importStatus === "completed" && (
-            <p style={{ marginTop: "0.5rem", color: "#166534", fontSize: "0.9rem" }}>
+            <p className="mt-2 text-sm text-emerald-700">
               This batch has been fully processed. You can still view the items below.
             </p>
           )}
           {commitSummary ? (
-            <p style={{ marginTop: "0.5rem", color: "#166534" }}>
+            <p className="mt-2 text-sm text-emerald-700">
               Committed words={commitSummary.committed.words}, phrases={commitSummary.committed.phrases}, sentences={commitSummary.committed.sentences}, geo_materials={commitSummary.committed.geoMaterials}, geo_features={commitSummary.committed.geoFeatures}, strategies={commitSummary.committed.strategies}.
             </p>
           ) : null}
-          {commitError ? <p style={{ marginTop: "0.5rem", color: "#b91c1c" }}>{commitError}</p> : null}
+          {commitError ? <p className="mt-2 text-sm text-red-700">{commitError}</p> : null}
         </section>
       ) : null}
 

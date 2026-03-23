@@ -16,26 +16,35 @@ const sections = [
 export function LibraryPage() {
   return (
     <AppShell title="Library" subtitle="Browse approved knowledge." pageDescription={null}>
-      <section style={{ border: "1px solid #e5e7eb", borderRadius: "0.75rem", background: "#ffffff", padding: "0.8rem", marginBottom: "0.9rem" }}>
+      <section className="mb-3 rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-sm">
         <details>
-          <summary style={{ cursor: "pointer", fontSize: "0.98rem", fontWeight: 700, color: "#0f172a" }}>Quick start</summary>
-          <div style={{ display: "grid", gap: "0.35rem", marginTop: "0.55rem" }}>
-            <p style={{ margin: 0, color: "#475569", lineHeight: 1.45 }}>
+          <summary className="cursor-pointer text-[0.98rem] font-semibold text-slate-900">Quick start</summary>
+          <div className="mt-2 grid gap-1.5">
+            <p className="m-0 text-sm leading-6 text-slate-600">
               Open a section or search first. Use detail pages for quick reading, reusable phrases, and item-linked personal notes.
             </p>
-            <p style={{ margin: 0, color: "#64748b", fontSize: "0.9rem", lineHeight: 1.4 }}>
+            <p className="m-0 text-xs leading-5 text-slate-500">
               System and approved imported knowledge appear here. Personal notes stay local to each item.
             </p>
           </div>
         </details>
       </section>
 
-      <div style={{ display: "grid", gap: "0.75rem" }}>
+      <div className="grid gap-3">
         {sections.map((section) => (
-          <article key={section.id} style={{ padding: "0.75rem", background: "#ffffff", borderRadius: "0.75rem", border: "1px solid #e5e7eb" }}>
-            <strong>{section.label}</strong>
-            <p style={{ margin: "0.35rem 0 0", color: "#64748b", fontSize: "0.95rem" }}>{section.description}</p>
-            <Link to={section.id === "search" ? "/library/search" : `/library/${section.id}`} style={{ display: "inline-block", padding: "0.5rem 1rem", background: "#2563eb", color: "#fff", textDecoration: "none", borderRadius: "0.5rem", marginTop: "0.5rem" }}>Open {section.label}</Link>
+          <article key={section.id} className="rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <strong className="block text-lg font-semibold text-slate-900">{section.label}</strong>
+                <p className="mt-1.5 text-sm leading-6 text-slate-600">{section.description}</p>
+              </div>
+              <Link
+                to={section.id === "search" ? "/library/search" : `/library/${section.id}`}
+                className="ekv-button-primary min-h-10 shrink-0 px-3 text-sm"
+              >
+                Open
+              </Link>
+            </div>
           </article>
         ))}
       </div>

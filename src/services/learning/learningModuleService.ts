@@ -51,6 +51,22 @@ export interface LearningCollectionCreateInput {
   description?: string;
 }
 
+export interface LearningCollectionUpdateInput {
+  id: string;
+  name: string;
+  sourceType?: LearningCollectionSourceType;
+  authority?: string;
+  documentNumber?: string;
+  edition?: string;
+  jurisdiction?: string;
+  description?: string;
+}
+
+export interface LearningCollectionDeleteOptions {
+  destinationCollectionId?: string;
+  deleteItems?: boolean;
+}
+
 export interface LearningImportResult {
   packId: string;
   imported: number;
@@ -249,6 +265,72 @@ export class LearningModuleService {
 
     await this.collectionRepository.insert(record);
     return record;
+  }
+
+  async updateCollection(input: LearningCollectionUpdateInput): Promise<LearningCollectionRecord> {
+    const existing = await this.collectionRepository.getById(input.id);
+    if (!existing) {
+      throw new Error("Learning list not found.");
+    }
+
+    const name = normalizeText(input.name);
+    if (!name) {
+      throw new Error("Collection name is required.");
+    }
+
+    const updated: LearningCollectionRecord = {
+      ...existing,
+      name,
+      sourceType: input.sourceType ?? existing.sourceType,
+      authority: normalizeText(input.authority),
+      documentNumber: normalizeText(input.documentNumber),
+      edition: normalizeText(input.edition),
+      jurisdiction: normalizeText(input.jurisdiction),
+      description: normalizeText(input.description),
+      updatedAt: nowIso()
+    };
+
+    await this.collectionRepository.update(updated);
+    return updated;
+  }
+
+  async deleteCollection(collectionId: string, options?: LearningCollectionDeleteOptions): Promise<{ deletedItems: number; movedItems: number }> {
+    const normalizedCollectionId = normalizeText(collectionId);
+    if (!normalizedCollectionId || normalizedCollectionId === DEFAULT_LEARNING_COLLECTION_ID) {
+      throw new Error("The default learning list cannot be deleted.");
+    }
+
+    const existing = await this.collectionRepository.getById(normalizedCollectionId);
+    if (!existing) {
+      throw new Error("Learning list not found.");
+    }
+
+    const allItems = await this.repository.listAll();
+    const affectedItems = allItems
+      .map((item) => this.normalizeRecord(item))
+      .filter((item) => item.collectionId === normalizedCollectionId);
+
+    let deletedItems = 0;
+    let movedItems = 0;
+
+    if (options?.deleteItems) {
+      deletedItems = await this.repository.deleteMany(affectedItems.map((item) => item.id));
+    } else {
+      const destinationCollectionId = await this.ensureCollectionId(options?.destinationCollectionId ?? DEFAULT_LEARNING_COLLECTION_ID);
+      const timestamp = nowIso();
+      const movedRecords = affectedItems.map((item) => ({
+        ...item,
+        collectionId: destinationCollectionId,
+        updatedAt: timestamp
+      }));
+      if (movedRecords.length > 0) {
+        await this.repository.upsertMany(movedRecords);
+      }
+      movedItems = movedRecords.length;
+    }
+
+    await this.collectionRepository.delete(normalizedCollectionId);
+    return { deletedItems, movedItems };
   }
 
   async importPack(rawJson: string, options?: LearningImportOptions): Promise<LearningImportResult> {

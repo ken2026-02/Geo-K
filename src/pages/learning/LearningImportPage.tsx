@@ -3,7 +3,9 @@ import { useSearchParams } from "react-router-dom";
 
 import type { LearningCollectionRecord, LearningCollectionSourceType } from "../../data/repositories/interfaces";
 import { parseTagsCsv } from "../../features/learning/classification";
+import { ConfirmDialog } from "../../shared/ui/feedback/ConfirmDialog";
 import { FeedbackBanner } from "../../shared/ui/feedback/FeedbackBanner";
+import { InlineInfo } from "../../shared/ui/feedback/InlineInfo";
 import { AppShell } from "../../shared/ui/layout/AppShell";
 import { LearningSubnav } from "./LearningSubnav";
 import { LearningModuleService, type LearningValidationIssue } from "../../services/learning/learningModuleService";
@@ -39,6 +41,7 @@ function summarizeOptionalWarnings(
 const inputLabelClass = "grid gap-2";
 const sectionTitleClass = "text-lg font-semibold text-slate-900";
 const sectionHintClass = "text-sm leading-6 text-slate-600";
+type DeleteListMode = "move_to_general" | "delete_items";
 const learningPackSampleJson = `{
   "schema_version": "1.0",
   "pack_id": "learning-pack-example",
@@ -226,6 +229,7 @@ export function LearningImportPage() {
   const [showDefaults, setShowDefaults] = useState(false);
   const [collections, setCollections] = useState<LearningCollectionRecord[]>([]);
   const [showCreateCollection, setShowCreateCollection] = useState(false);
+  const [editingCollectionId, setEditingCollectionId] = useState<string>();
   const [newCollectionName, setNewCollectionName] = useState("");
   const [newCollectionSourceType, setNewCollectionSourceType] = useState<LearningCollectionSourceType>("standard");
   const [newCollectionAuthority, setNewCollectionAuthority] = useState("");
@@ -238,6 +242,8 @@ export function LearningImportPage() {
   const [message, setMessage] = useState<string>();
   const [error, setError] = useState<string>();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showDeleteCollectionConfirm, setShowDeleteCollectionConfirm] = useState(false);
+  const [deleteListMode, setDeleteListMode] = useState<DeleteListMode>("move_to_general");
   const activeCollectionId = searchParams.get("collection") ?? "";
 
   async function refreshCollections(): Promise<void> {
@@ -299,6 +305,7 @@ export function LearningImportPage() {
         return nextParams;
       });
       setShowCreateCollection(false);
+      setEditingCollectionId(undefined);
       setNewCollectionName("");
       setNewCollectionAuthority("");
       setNewCollectionDocumentNumber("");
@@ -308,6 +315,117 @@ export function LearningImportPage() {
       setMessage(`Created learning list: ${created.name}.`);
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : "Failed to create learning list.");
+    } finally {
+      setIsProcessing(false);
+    }
+  }
+
+  function startCreateCollection(): void {
+    setEditingCollectionId(undefined);
+    setShowCreateCollection((value) => {
+      const next = !value;
+      if (next) {
+        setNewCollectionName("");
+        setNewCollectionSourceType("standard");
+        setNewCollectionAuthority("");
+        setNewCollectionDocumentNumber("");
+        setNewCollectionEdition("");
+        setNewCollectionJurisdiction("");
+        setNewCollectionDescription("");
+      }
+      return next;
+    });
+  }
+
+  function startEditCollection(collection: LearningCollectionRecord): void {
+    setShowCreateCollection(true);
+    setEditingCollectionId(collection.id);
+    setNewCollectionName(collection.name);
+    setNewCollectionSourceType(collection.sourceType);
+    setNewCollectionAuthority(collection.authority ?? "");
+    setNewCollectionDocumentNumber(collection.documentNumber ?? "");
+    setNewCollectionEdition(collection.edition ?? "");
+    setNewCollectionJurisdiction(collection.jurisdiction ?? "");
+    setNewCollectionDescription(collection.description ?? "");
+  }
+
+  function resetCollectionEditor(): void {
+    setShowCreateCollection(false);
+    setEditingCollectionId(undefined);
+    setNewCollectionName("");
+    setNewCollectionSourceType("standard");
+    setNewCollectionAuthority("");
+    setNewCollectionDocumentNumber("");
+    setNewCollectionEdition("");
+    setNewCollectionJurisdiction("");
+    setNewCollectionDescription("");
+  }
+
+  async function handleSaveCollection(): Promise<void> {
+    if (editingCollectionId) {
+      setIsProcessing(true);
+      clearFeedback();
+      try {
+        const updated = await learningService.updateCollection({
+          id: editingCollectionId,
+          name: newCollectionName,
+          sourceType: newCollectionSourceType,
+          authority: newCollectionAuthority,
+          documentNumber: newCollectionDocumentNumber,
+          edition: newCollectionEdition,
+          jurisdiction: newCollectionJurisdiction,
+          description: newCollectionDescription
+        });
+        await refreshCollections();
+        setSearchParams((current) => {
+          const nextParams = new URLSearchParams(current);
+          nextParams.set("collection", updated.id);
+          return nextParams;
+        });
+        resetCollectionEditor();
+        setMessage(`Updated learning list: ${updated.name}.`);
+      } catch (updateError) {
+        setError(updateError instanceof Error ? updateError.message : "Failed to update learning list.");
+      } finally {
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    await handleCreateCollection();
+  }
+
+  async function handleDeleteCollection(): Promise<void> {
+    if (!activeCollection || isProcessing) {
+      return;
+    }
+
+    setIsProcessing(true);
+    clearFeedback();
+    try {
+      const result = await learningService.deleteCollection(activeCollection.id, {
+        deleteItems: deleteListMode === "delete_items"
+      });
+      await refreshCollections();
+      setSearchParams((current) => {
+        const nextParams = new URLSearchParams(current);
+        const nextCollection = collections.find((collection) => collection.id !== activeCollection.id)?.id;
+        if (nextCollection) {
+          nextParams.set("collection", nextCollection);
+        } else {
+          nextParams.delete("collection");
+        }
+        return nextParams;
+      });
+      setShowDeleteCollectionConfirm(false);
+      resetCollectionEditor();
+      setMessage(
+        deleteListMode === "delete_items"
+          ? `Deleted list ${activeCollection.name} and removed ${result.deletedItems} item(s).`
+          : `Deleted list ${activeCollection.name}. ${result.movedItems} item(s) moved to General Learning.`
+      );
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "Failed to delete learning list.");
     } finally {
       setIsProcessing(false);
     }
@@ -391,6 +509,20 @@ export function LearningImportPage() {
 
   return (
     <AppShell title="Learning Import" subtitle="Import one learning pack into one list at a time." pageDescription={null}>
+      <ConfirmDialog
+        open={showDeleteCollectionConfirm}
+        title="Delete learning list?"
+        body={
+          deleteListMode === "delete_items"
+            ? `Delete ${activeCollection?.name ?? "this list"} and permanently remove all items inside it.`
+            : `Delete ${activeCollection?.name ?? "this list"} and move all items inside it to General Learning.`
+        }
+        confirmLabel={deleteListMode === "delete_items" ? "Delete list and items" : "Delete list"}
+        tone="danger"
+        busy={isProcessing}
+        onConfirm={() => void handleDeleteCollection()}
+        onCancel={() => setShowDeleteCollectionConfirm(false)}
+      />
       <LearningSubnav />
 
       <div className="mt-4 space-y-4">
@@ -398,15 +530,15 @@ export function LearningImportPage() {
         {error ? <FeedbackBanner tone="error" message={error} /> : null}
       </div>
 
-      <section className="ekv-card mt-4 p-4 sm:p-5">
-        <div className="space-y-1">
+      <section className="ekv-card mt-4 p-3 sm:p-4">
+        <div className="flex flex-wrap items-center gap-2">
           <h3 className={sectionTitleClass}>Import JSON</h3>
-          <p className={sectionHintClass}>
+          <InlineInfo title="Import learning pack">
             Choose a target learning list first, then upload or paste a Learning Pack v1 JSON file.
-          </p>
+          </InlineInfo>
         </div>
 
-        <div className="mt-4 rounded-3xl border border-indigo-100 bg-indigo-50/70 p-4">
+        <div className="mt-3 rounded-3xl border border-indigo-100 bg-indigo-50/70 p-3.5">
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <label className={inputLabelClass}>
               <span className="ekv-label">Target learning list</span>
@@ -427,9 +559,27 @@ export function LearningImportPage() {
               </select>
             </label>
 
-              <button type="button" onClick={() => setShowCreateCollection((value) => !value)} className="ekv-button-compact w-full lg:w-auto">
-                {showCreateCollection ? "Hide New List Form" : "Create New List"}
+            <div className="grid grid-cols-3 gap-2 lg:w-auto">
+              <button type="button" onClick={startCreateCollection} className="ekv-button-compact min-w-0 px-2">
+                {editingCollectionId ? "New" : "Create"}
               </button>
+              <button
+                type="button"
+                onClick={() => activeCollection ? startEditCollection(activeCollection) : undefined}
+                disabled={!activeCollection}
+                className="ekv-button-compact min-w-0 px-2"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDeleteCollectionConfirm(true)}
+                disabled={!activeCollection || activeCollection.id === "collection-general"}
+                className="ekv-button-compact min-w-0 px-2 text-red-700 hover:bg-red-50"
+              >
+                Delete
+              </button>
+            </div>
           </div>
 
           {activeCollection ? (
@@ -438,18 +588,10 @@ export function LearningImportPage() {
                 <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
                   {activeCollection.sourceType}
                 </span>
-                {activeCollection.documentNumber ? (
-                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
-                    {activeCollection.documentNumber}
-                  </span>
-                ) : null}
-                {activeCollection.authority ? (
-                  <span className="inline-flex items-center rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700 ring-1 ring-cyan-200">
-                    {activeCollection.authority}
-                  </span>
-                ) : null}
+                <p className="text-sm font-semibold text-slate-900">{activeCollection.name}</p>
+                {activeCollection.documentNumber ? <span className="text-sm text-slate-500">{activeCollection.documentNumber}</span> : null}
+                {activeCollection.authority ? <span className="text-sm text-slate-500">{activeCollection.authority}</span> : null}
               </div>
-              <p className="mt-2 text-sm font-semibold text-slate-900">{activeCollection.name}</p>
               {activeCollection.description ? <p className="mt-1 text-sm leading-5 text-slate-600">{activeCollection.description}</p> : null}
             </div>
           ) : null}
@@ -492,9 +634,39 @@ export function LearningImportPage() {
                 <textarea value={newCollectionDescription} onChange={(event) => setNewCollectionDescription(event.target.value)} rows={3} className="ekv-textarea" />
               </label>
               <div className="sm:col-span-2">
-                <button type="button" onClick={() => void handleCreateCollection()} disabled={isProcessing} className="ekv-button-primary">
-                  Create List
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={() => void handleSaveCollection()} disabled={isProcessing} className="ekv-button-primary">
+                    {editingCollectionId ? "Save List" : "Create List"}
+                  </button>
+                  <button type="button" onClick={resetCollectionEditor} className="ekv-button-secondary">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {showDeleteCollectionConfirm ? (
+            <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-3">
+              <div className="grid gap-2">
+                <label className="flex items-center gap-2 text-sm text-slate-700">
+                  <input
+                    type="radio"
+                    checked={deleteListMode === "move_to_general"}
+                    onChange={() => setDeleteListMode("move_to_general")}
+                    className="h-4 w-4"
+                  />
+                  Move items to General Learning
+                </label>
+                <label className="flex items-center gap-2 text-sm text-slate-700">
+                  <input
+                    type="radio"
+                    checked={deleteListMode === "delete_items"}
+                    onChange={() => setDeleteListMode("delete_items")}
+                    className="h-4 w-4"
+                  />
+                  Delete list and all items inside it
+                </label>
               </div>
             </div>
           ) : null}

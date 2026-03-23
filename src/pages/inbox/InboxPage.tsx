@@ -225,15 +225,13 @@ export function InboxPage() {
         onCancel={() => setConfirmAction(null)}
       />
 
-      <section style={{ marginBottom: "1rem", border: "1px solid #e5e7eb", borderRadius: "0.8rem", padding: "0.85rem", background: "#fff" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-            <h3 style={{ margin: 0 }}>Import JSON or ZIP</h3>
+      <section className="ekv-card mb-4 p-3 sm:p-4">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="m-0 text-lg font-semibold text-slate-900">Import JSON or ZIP</h3>
               <InlineInfo title="Inbox import">
                 Choose a pack, validate it, then stage it to pending review. Use format help only when you need contract details or examples.
               </InlineInfo>
-            </div>
           </div>
           <button
             type="button"
@@ -243,39 +241,39 @@ export function InboxPage() {
             {showImportGuide ? "Hide format help" : "Show format help"}
           </button>
         </div>
-        <input type="file" accept="application/json,.json,application/zip,.zip" onChange={handleFileChange} />
-        <div style={{ marginTop: "0.5rem" }}>
-          <input value={sourceFileName} onChange={(event) => setSourceFileName(event.target.value)} style={{ width: "100%", marginBottom: "0.5rem" }} />
-          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem", flexWrap: "wrap", position: "sticky", top: "0.5rem", zIndex: 5, padding: "0.25rem 0", background: "rgba(255,255,255,0.96)" }}>
+        <input type="file" accept="application/json,.json,application/zip,.zip" onChange={handleFileChange} className="ekv-input file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100" />
+        <div className="mt-2">
+          <input value={sourceFileName} onChange={(event) => setSourceFileName(event.target.value)} className="ekv-input mb-2" />
+          <div className="sticky top-2 z-10 mb-2 flex flex-wrap gap-2 bg-white/95 py-1 backdrop-blur">
             <button onClick={() => void handleValidateOnly()} disabled={!rawJson.trim() || isProcessing} className="ekv-button-secondary">
-              Validate JSON Pack
+              Validate
             </button>
             <button onClick={() => void handleImport()} disabled={(!selectedFile && !rawJson.trim()) || isProcessing} className="ekv-button-primary">
-              Validate and Stage to Pending
+              Stage to Pending
             </button>
           </div>
           {!selectedFile || selectedFile.name.toLowerCase().endsWith(".json") ? (
-            <textarea value={rawJson} onChange={(event) => setRawJson(event.target.value)} rows={10} style={{ width: "100%", minHeight: "220px", maxHeight: "52vh" }} />
+            <textarea value={rawJson} onChange={(event) => setRawJson(event.target.value)} rows={10} className="ekv-textarea min-h-[220px] max-h-[52vh]" />
           ) : (
-            <p style={{ color: "#4b5563" }}>ZIP selected: knowledge_pack.json and images/ will be read during import.</p>
+            <p className="text-sm text-slate-600">ZIP selected: knowledge_pack.json and images/ will be read during import.</p>
           )}
         </div>
-        <p style={{ marginTop: "0.5rem" }}><strong>Validation state:</strong> {validationState}</p>
-        {validationSummary ? <p style={{ margin: "0.25rem 0 0", color: validationState === "invalid" ? "#b91c1c" : "#166534" }}>{validationSummary}</p> : null}
-        {message ? <div style={{ marginTop: "0.75rem" }}><FeedbackBanner tone="success" message={message} /></div> : null}
-        {error ? <div style={{ marginTop: "0.75rem" }}><FeedbackBanner tone="error" message={error} /></div> : null}
-        {failurePhase ? <p style={{ color: "#92400e" }}>Failure phase: {failurePhase}</p> : null}
-        {attemptedBatchId ? <p style={{ color: "#374151" }}>Attempted batch id: {attemptedBatchId}</p> : null}
+        <p className="mt-2 text-sm"><strong>Validation state:</strong> {validationState}</p>
+        {validationSummary ? <p className={`mt-1 text-sm ${validationState === "invalid" ? "text-red-700" : "text-emerald-700"}`}>{validationSummary}</p> : null}
+        {message ? <div className="mt-3"><FeedbackBanner tone="success" message={message} /></div> : null}
+        {error ? <div className="mt-3"><FeedbackBanner tone="error" message={error} /></div> : null}
+        {failurePhase ? <p className="text-sm text-amber-700">Failure phase: {failurePhase}</p> : null}
+        {attemptedBatchId ? <p className="text-sm text-slate-600">Attempted batch id: {attemptedBatchId}</p> : null}
         {validationErrors.length > 0 ? (
-          <div style={{ marginTop: "0.75rem", border: "1px solid #fecaca", padding: "0.75rem", borderRadius: "0.5rem", background: "#fef2f2" }}>
-            <strong>Validation / import errors</strong>
-            <ul>
+          <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3">
+            <strong className="text-red-900">Validation / import errors</strong>
+            <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-red-900">
               {validationErrors.map((detail, index) => {
                 const context = ruleReferenceService.getValidationContext(detail.code);
                 return (
                   <li key={`${detail.code}-${index}`}>
                     <div>{detail.code}: {detail.message}</div>
-                    {context ? <div style={{ color: "#7f1d1d", fontSize: "0.9rem" }}>Rule context: {context.ruleCategory} | {context.relevance}</div> : null}
+                    {context ? <div className="text-sm text-red-800">Rule context: {context.ruleCategory} | {context.relevance}</div> : null}
                   </li>
                 );
               })}
@@ -283,15 +281,15 @@ export function InboxPage() {
           </div>
         ) : null}
         {validationWarnings.length > 0 ? (
-          <div style={{ marginTop: "0.75rem", border: "1px solid #fde68a", padding: "0.75rem", borderRadius: "0.5rem", background: "#fffbeb" }}>
-            <strong>Warnings</strong>
-            <ul>
+          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3">
+            <strong className="text-amber-900">Warnings</strong>
+            <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-amber-900">
               {validationWarnings.map((detail, index) => {
                 const context = ruleReferenceService.getValidationContext(detail.code);
                 return (
                   <li key={`${detail.code}-${index}`}>
                     <div>{detail.code}: {detail.message}</div>
-                    {context ? <div style={{ color: "#92400e", fontSize: "0.9rem" }}>Rule context: {context.ruleCategory} | {context.relevance}</div> : null}
+                    {context ? <div className="text-sm text-amber-800">Rule context: {context.ruleCategory} | {context.relevance}</div> : null}
                   </li>
                 );
               })}
@@ -301,94 +299,82 @@ export function InboxPage() {
       </section>
 
       {showImportGuide ? (
-        <section style={{ marginBottom: "1rem", border: "1px solid #dbeafe", borderRadius: "0.75rem", padding: "0.75rem", background: "#eff6ff" }}>
-          <h3 style={{ marginTop: 0, marginBottom: "0.45rem" }}>Import format help</h3>
-          <p style={{ margin: "0 0 0.35rem", color: "#1f2937", lineHeight: 1.45 }}>
+        <section className="ekv-card mb-4 border-sky-200 bg-sky-50 p-3 sm:p-4">
+          <h3 className="mb-2 text-base font-semibold text-slate-900">Import format help</h3>
+          <p className="text-sm leading-6 text-slate-800">
             Inbox accepts the current user JSON or ZIP knowledge-pack contract for pending review.
           </p>
-          <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1.2rem", color: "#334155" }}>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-700">
             <li>Learning Pack v1 is the fast-ingest path.</li>
             <li>System Pack v1 stays an internal Settings workflow.</li>
             <li>Structured system injection still needs AI or manual review between contracts.</li>
           </ul>
-          <p style={{ margin: "0.55rem 0 0", color: "#475569", fontSize: "0.92rem", lineHeight: 1.45 }}>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
             Samples: <a href="/pack-samples/learning-pack-v1.sample.json" target="_blank" rel="noreferrer">Learning Pack v1</a> | <a href="/pack-samples/system-pack-v1.sample.json" target="_blank" rel="noreferrer">System Pack v1</a>
           </p>
-          <p style={{ margin: "0.25rem 0 0", color: "#64748b", fontSize: "0.88rem" }}>
+          <p className="mt-1 text-xs text-slate-500">
             Developer spec: docs/contracts/pack-contract-freeze.md
           </p>
         </section>
       ) : null}
 
-      <section style={{ marginBottom: "1rem", border: "1px solid #e5e7eb", borderRadius: "0.75rem", padding: "0.75rem", background: "#f8fafc" }}>
+      <section className="ekv-card mb-4 bg-slate-50 p-3">
         <details>
-          <summary style={{ cursor: "pointer", fontWeight: 700, color: "#0f172a" }}>User Batch Verification Terms</summary>
-          <p style={{ margin: "0.55rem 0 0.25rem" }}>
+          <summary className="cursor-pointer text-sm font-semibold text-slate-900">User Batch Verification Terms</summary>
+          <p className="mt-2 text-sm text-slate-700">
             Expected in Library after approve + commit: {USER_BATCH_EXPECTED_LIBRARY_TERMS.join(", ")}.
           </p>
-          <p style={{ margin: "0.25rem 0 0" }}>
+          <p className="mt-1 text-sm text-slate-700">
             If rejected or deferred, these should stay out of Library: {USER_BATCH_EXPECTED_PENDING_TERMS.join(", ")}.
           </p>
         </details>
       </section>
 
       <section>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", gap: "0.75rem", flexWrap: "wrap" }}>
-          <h3 style={{ margin: 0 }}>Import Batches</h3>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h3 className="m-0 text-lg font-semibold text-slate-900">Import Batches</h3>
           {batches.length > 0 && (
             <button 
               onClick={() => setConfirmAction({ kind: "clear_all" })} 
               disabled={isProcessing}
-              style={{ padding: "0.25rem 0.5rem", fontSize: "0.85rem", background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "0.4rem", cursor: "pointer" }}
+              className="ekv-button-danger min-h-9 px-3 py-2 text-xs"
             >
-              Clear All Records
+              Clear all
             </button>
           )}
         </div>
         
         {batches.length === 0 ? <p>No batches staged yet.</p> : null}
         
-        <div style={{ display: "grid", gap: "0.75rem" }}>
+        <div className="grid gap-3">
           {(isExpanded ? batches : batches.slice(0, 3)).map((batch) => (
-            <div key={batch.id} style={{ 
-              padding: "0.75rem", 
-              border: "1px solid #e5e7eb", 
-              borderRadius: "0.75rem",
-              background: batch.importStatus === "completed" ? "#f0fdf4" : "#fff"
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem", flexWrap: "wrap" }}>
-                <div style={{ flex: "1 1 260px", minWidth: 0 }}>
-                  <Link to={`/inbox/${batch.id}`} style={{ fontWeight: "bold", fontSize: "1.1rem", textDecoration: "none", color: "#2563eb" }}>{batch.batchName}</Link>
-                  <div style={{ marginTop: "0.25rem", color: "#4b5563", fontSize: "0.9rem" }}>
+            <div key={batch.id} className={`rounded-2xl border p-3 ${batch.importStatus === "completed" ? "border-emerald-200 bg-emerald-50/50" : "border-slate-200 bg-white"}`}>
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1 basis-[260px]">
+                  <Link to={`/inbox/${batch.id}`} className="text-lg font-semibold text-indigo-700 hover:text-indigo-800">{batch.batchName}</Link>
+                  <div className="mt-1 text-sm text-slate-600">
                     File: {batch.sourceFileName ?? "unknown"} | Report ID: {batch.sourceReportId ?? "N/A"}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-                  <span style={{ 
-                    padding: "0.25rem 0.5rem", 
-                    borderRadius: "0.25rem", 
-                    fontSize: "0.8rem",
-                    fontWeight: "bold",
-                    background: batch.importStatus === "completed" ? "#dcfce7" : "#fef9c3",
-                    color: batch.importStatus === "completed" ? "#166534" : "#854d0e"
-                  }}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`ekv-chip ${batch.importStatus === "completed" ? "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200" : "bg-amber-50 text-amber-700 ring-1 ring-amber-200"}`}>
                     {batch.importStatus === "completed" ? "COMPLETED" : "REVIEW IN PROGRESS"}
                   </span>
                   <button 
                     onClick={() => setConfirmAction({ kind: "delete_batch", batchId: batch.id })} 
                     disabled={isProcessing}
-                    style={{ padding: "0.2rem 0.4rem", fontSize: "0.75rem", background: "#fff", color: "#dc2626", border: "1px solid #fecaca", borderRadius: "0.3rem", cursor: "pointer" }}
+                    className="ekv-button-danger min-h-8 px-2.5 py-1.5 text-xs"
                   >
                     Delete
                   </button>
                 </div>
               </div>
-              <div style={{ marginTop: "0.5rem", display: "flex", gap: "1rem", flexWrap: "wrap", fontSize: "0.9rem", color: "#374151" }}>
+              <div className="mt-2 flex flex-wrap gap-4 text-sm text-slate-700">
                 <span>Pending: <strong>{batch.pendingItems}</strong></span>
                 <span>Approved: <strong>{batch.approvedItems}</strong></span>
                 <span>Rejected: <strong>{batch.rejectedItems}</strong></span>
               </div>
-              <div style={{ marginTop: "0.25rem", color: "#6b7280", fontSize: "0.85rem" }}>
+              <div className="mt-1 text-xs text-slate-500 sm:text-sm">
                 {`Report: ${batch.sourceReportTitle ?? "unknown"} | Project: ${batch.sourceReportProject ?? "unknown"}`}
               </div>
             </div>
@@ -398,7 +384,7 @@ export function InboxPage() {
         {batches.length > 3 && (
           <button 
             onClick={() => setIsExpanded(!isExpanded)} 
-            style={{ marginTop: "1rem", width: "100%", padding: "0.5rem", background: "#f3f4f6", border: "1px solid #d1d5db", borderRadius: "0.5rem", cursor: "pointer", fontWeight: 600 }}
+            className="ekv-button-secondary mt-4 w-full"
           >
             {isExpanded ? "Fold (Show Recent 3)" : `Show All (${batches.length})`}
           </button>
